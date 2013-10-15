@@ -1,0 +1,6 @@
+<Context>
+	<Resource name="jdbc/database" auth="Container" type="javax.sql.DataSource"
+		maxActive="50" maxIdle="30" maxWait="10000" username="zoek_db"
+		password="D8X4UDTFAaJLFsXZ" driverClassName="com.mysql.jdbc.Driver"
+		url="jdbc:mysql://localhost:3306/zoek_db" />
+</Context>

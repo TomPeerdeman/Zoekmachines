@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+	<display-name>Zoekmachine webapp</display-name>
+
+	<servlet>
+		<servlet-name>SearchApplication</servlet-name>
+		<servlet-class>nl.uva.search.SearchServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SearchApplication</servlet-name>
+		<url-pattern>/search</url-pattern>
+	</servlet-mapping>
+
+	<resource-ref>
+		<description>MySQL Datasource</description>
+		<res-ref-name>jdbc/database</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+</web-app>
