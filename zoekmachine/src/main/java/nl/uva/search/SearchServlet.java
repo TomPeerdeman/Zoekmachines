@@ -60,7 +60,7 @@ public class SearchServlet extends HttpServlet {
 		}
 		
 		out.print("<h1>Hello world from the app!</h1>");
-		
+		out.print("input: " );
 		out.print(conn);
 		
 		Statement stm = null;
