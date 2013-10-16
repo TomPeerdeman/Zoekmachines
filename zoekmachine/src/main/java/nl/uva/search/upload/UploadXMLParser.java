@@ -51,7 +51,6 @@ public class UploadXMLParser extends DefaultHandler {
 		columnMapping = new HashMap<String, String>();
 		columnMapping.put("Inhoud", "contents");
 		columnMapping.put("Rubriek", "category");
-		columnMapping.put("Afkomstig_van", "origin");
 		columnMapping.put("Document-id", "doc_id");
 		columnMapping.put("Trefwoorden", "keywords");
 		
@@ -107,9 +106,15 @@ public class UploadXMLParser extends DefaultHandler {
 				} else if(itemAttr.equalsIgnoreCase("Bibliografische_omschrijving")) {
 					// Parse title
 					int start = text.lastIndexOf("over");
-					System.out.printf("FULLTitle %s\n", text.toString());
-					System.out.printf("Title start %d\n", start);
 					start += 5;
+					if(start < 5) {
+						start = text.lastIndexOf("inzake");
+						start += 7;
+						if(start < 7) {
+							start = -1;
+						}
+					}
+					
 					if(start > 5) {
 						int end = text.lastIndexOf("(");
 						System.out.printf("Title end %d\n", end);
@@ -120,7 +125,6 @@ public class UploadXMLParser extends DefaultHandler {
 							title =
 								text.substring(start, start + 1).toUpperCase()
 										+ title;
-							System.out.printf("Title %s\n", title);
 							docDescr.put("title", escape(title));
 						}
 					}
