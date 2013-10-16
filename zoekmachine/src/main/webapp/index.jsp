@@ -6,5 +6,9 @@
 	<input type='text' name='query'/>
 	<input type='submit' value='Search' />
 </form>
+<br>
+<form method="POST" action="advanced">
+	<input type='submit' name='advanced' value='Advanced Search' />
+</form>
 </body>
 </html>

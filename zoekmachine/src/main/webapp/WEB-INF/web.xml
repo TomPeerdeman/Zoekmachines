@@ -12,7 +12,16 @@
 		<servlet-name>SearchApplication</servlet-name>
 		<url-pattern>/search/*</url-pattern>
 	</servlet-mapping>
-	
+
+	<servlet>
+		<servlet-name>SearchApplication</servlet-name>
+		<servlet-class>nl.uva.search.SearchServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SearchApplication</servlet-name>
+		<url-pattern>/advanced/*</url-pattern>
+	</servlet-mapping>	
+		
 	<servlet>
 		<servlet-name>SearchApplicationUP</servlet-name>
 		<servlet-class>nl.uva.search.upload.UploadServlet</servlet-class>

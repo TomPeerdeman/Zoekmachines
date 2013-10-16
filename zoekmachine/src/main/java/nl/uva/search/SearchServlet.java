@@ -32,6 +32,7 @@ public class SearchServlet extends HttpServlet {
 	private static final long serialVersionUID = -3460489316807949031L;
 	private static String INDEX_JSP = "/index.jsp";
 	private static String RESULTS_JSP = "/results.jsp";
+	private static String ADVANCED_JSP = "/advanced.jsp";
 	
 	private DataSource db;
 	
@@ -117,13 +118,16 @@ public class SearchServlet extends HttpServlet {
 	    // Get a map of the request parameters
 	    @SuppressWarnings("unchecked")
 	    Map parameters = req.getParameterMap();
-	    if (parameters.containsKey("query"))
-	      forward = RESULTS_JSP;
-	    RequestDispatcher view = req.getRequestDispatcher(forward);
-	    // uncomment to be forwarded to results page
-	    //view.forward(req, resp);
-	    PrintWriter out = resp.getWriter();
-		String query = req.getParameter("query");
-		out.print(query);
+	    if (parameters.containsKey("advanced")) {
+	      forward = ADVANCED_JSP;
+		    RequestDispatcher view = req.getRequestDispatcher(forward);	
+		    view.forward(req, resp);
+	    }
+	    else {
+		    PrintWriter out = resp.getWriter();
+			String query = req.getParameter("query");
+			out.print("<h1>Results:</h1>");
+			out.print(query);
+	    }
 	}
 }
