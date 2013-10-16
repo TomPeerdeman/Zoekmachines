@@ -1,5 +1,10 @@
 <html>
 <body>
-<h2>Hello World!</h2>
+
+<h1>Welcome to Elgoog!</h1>
+<form method="POST" action="search">
+	<input type='text' name='query'/>
+	<input type='submit' value='Search' />
+</form>
 </body>
 </html>
