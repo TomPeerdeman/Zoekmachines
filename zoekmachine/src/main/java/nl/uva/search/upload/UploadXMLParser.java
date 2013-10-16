@@ -5,7 +5,6 @@
 package nl.uva.search.upload;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -30,9 +29,15 @@ public class UploadXMLParser extends DefaultHandler {
 	
 	private LinkedList<NameAttributePair> stack;
 	private Connection db;
-	private int docId = -1;
 	private Map<String, String> docDescr;
 	private StringBuilder text;
+	
+	private StringBuilder questions;
+	private StringBuilder questioners;
+	private StringBuilder questioners_party;
+	private StringBuilder answers;
+	private StringBuilder answerers;
+	private StringBuilder answerers_ministry;
 	
 	/**
 	 * @param db
@@ -48,8 +53,16 @@ public class UploadXMLParser extends DefaultHandler {
 		columnMapping.put("Rubriek", "category");
 		columnMapping.put("Afkomstig_van", "origin");
 		columnMapping.put("Document-id", "doc_id");
+		columnMapping.put("Trefwoorden", "keywords");
 		
 		docDescr = new HashMap<String, String>();
+		
+		questions = new StringBuilder();
+		questioners = new StringBuilder();
+		questioners_party = new StringBuilder();
+		answers = new StringBuilder();
+		answerers = new StringBuilder();
+		answerers_ministry = new StringBuilder();
 	}
 	
 	@Override
@@ -91,19 +104,60 @@ public class UploadXMLParser extends DefaultHandler {
 						docDescr.put("answering_month", "" + m.group(2));
 						docDescr.put("answering_day", "" + m.group(3));
 					}
+				} else if(itemAttr.equalsIgnoreCase("Bibliografische_omschrijving")) {
+					// Parse title
+					int start = text.lastIndexOf("over");
+					System.out.printf("FULLTitle %s\n", text.toString());
+					System.out.printf("Title start %d\n", start);
+					start += 5;
+					if(start > 5) {
+						int end = text.lastIndexOf("(");
+						System.out.printf("Title end %d\n", end);
+						if(end > 0) {
+							String title =
+								text.substring(start + 1, end);
+							// Add capitalized first letter
+							title =
+								text.substring(start, start + 1).toUpperCase()
+										+ title;
+							System.out.printf("Title %s\n", title);
+							docDescr.put("title", escape(title));
+						}
+					}
 				}
-			} else if(qName.equalsIgnoreCase("metadata") && docId < 0
-					&& docDescr.size() > 0) {
-				insertDocument();
 			} else if(qName.equalsIgnoreCase("vraag")) {
-				insertQuestion(attr.get("nummer"), text.toString());
+				questions.append(escape(attr.get("nummer")));
+				questions.append(" ");
+				questions.append(escape(text.toString()));
+				questions.append(" ");
 			} else if(qName.equalsIgnoreCase("antwoord")) {
-				insertAnswer(attr.get("nummer"), text.toString());
+				answers.append(escape(attr.get("nummer")));
+				answers.append(" ");
+				answers.append(escape(text.toString()));
+				answers.append(" ");
 			} else if(qName.equalsIgnoreCase("vrager")) {
-				insertQuestioner(attr.get("partij"), text.toString());
+				questioners.append(escape(attr.get("partij")));
+				questioners.append(" ");
+				questioners_party.append(escape(text.toString()));
+				questioners_party.append(" ");
 			} else if(qName.equalsIgnoreCase("antwoorder")) {
-				insertAnswerer(attr.get("functie"), attr.get("ministerie"),
-						text.toString());
+				answerers_ministry.append(escape(attr.get("ministerie")));
+				answerers_ministry.append(" ");
+				answerers.append(escape(text.toString()));
+				answerers.append(" ");
+			} else if(qName.equalsIgnoreCase("kvr")) {
+				// End of document
+				
+				docDescr.put("questions", questions.toString());
+				docDescr.put("questioners", questioners.toString());
+				docDescr.put("questioners_party", questioners_party.toString());
+				
+				docDescr.put("answers", answers.toString());
+				docDescr.put("answerers", answerers.toString());
+				docDescr.put("answerers_ministry",
+						answerers_ministry.toString());
+				
+				insertDocument();
 			}
 		}
 	}
@@ -129,133 +183,18 @@ public class UploadXMLParser extends DefaultHandler {
 			values = values.substring(0, values.length() - 2);
 			
 			Statement stm = null;
-			ResultSet res = null;
 			try {
 				stm = db.createStatement();
 				stm.execute("INSERT INTO documents (" + cols + ")  VALUES ("
-						+ values + ")", Statement.RETURN_GENERATED_KEYS);
-				res = stm.getGeneratedKeys();
-				
-				if(res.next()) {
-					docId = res.getInt(1);
-					docDescr.clear();
-				}
+						+ values + ")");
 			} catch(SQLException e) {
-				e.printStackTrace();
+				throw new SAXException(e);
 			} finally {
-				if(res != null) {
-					try {
-						res.close();
-					} catch(SQLException e) {
-					}
-				}
 				if(stm != null) {
 					try {
 						stm.close();
 					} catch(SQLException e) {
 					}
-				}
-			}
-		}
-	}
-	
-	private void insertQuestion(String number, String text) throws SAXException {
-		Statement stm = null;
-		try {
-			stm = db.createStatement();
-			stm.execute("INSERT INTO questions (doc_id, question_id, question_text)"
-					+ " VALUES ('"
-					+ docId + "', '" + number + "', '" + escape(text) + "'"
-					+ ")");
-		} catch(SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if(stm != null) {
-				try {
-					stm.close();
-				} catch(SQLException e) {
-				}
-			}
-		}
-	}
-	
-	private void insertAnswer(String number, String text) throws SAXException {
-		Statement stm = null;
-		try {
-			
-			stm = db.createStatement();
-			stm.execute("INSERT INTO answers (doc_id, question_id, answer_text)"
-					+ " VALUES ('"
-					+ docId + "', '" + number + "', '" + escape(text) + "'"
-					+ ")");
-		} catch(SQLException e) {
-			e.printStackTrace();
-			throw new SAXException(
-					"INSERT INTO answers (doc_id, question_id, answer_text)"
-							+ " VALUES ('"
-							+ docId + "', '" + number + "', '" + escape(text)
-							+ "'"
-							+ ")");
-		} finally {
-			if(stm != null) {
-				try {
-					stm.close();
-				} catch(SQLException e) {
-				}
-			}
-		}
-	}
-	
-	private void insertQuestioner(String party, String name)
-			throws SAXException {
-		Statement stm = null;
-		try {
-			stm = db.createStatement();
-			stm.execute("INSERT INTO questioners (doc_id, questioner_party, questioner_name)"
-					+ " VALUES ('"
-					+ docId
-					+ "', '"
-					+ escape(party)
-					+ "', '"
-					+ escape(name)
-					+ "'"
-					+ ")");
-		} catch(SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if(stm != null) {
-				try {
-					stm.close();
-				} catch(SQLException e) {
-				}
-			}
-		}
-	}
-	
-	private void insertAnswerer(String function, String ministry, String name)
-			throws SAXException {
-		Statement stm = null;
-		try {
-			stm = db.createStatement();
-			stm.execute("INSERT INTO answerers "
-					+ "(doc_id, answerer_function, answerer_ministry, answerer_name)"
-					+ " VALUES ('"
-					+ docId
-					+ "', '"
-					+ escape(function)
-					+ "', '"
-					+ escape(ministry)
-					+ "', '"
-					+ escape(name)
-					+ "'"
-					+ ")");
-		} catch(SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if(stm != null) {
-				try {
-					stm.close();
-				} catch(SQLException e) {
 				}
 			}
 		}
