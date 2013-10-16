@@ -76,7 +76,7 @@ public class UploadServlet extends HttpServlet {
 						saxParser.parse(file.getInputStream(),
 								new UploadXMLParser(conn));
 					} catch(SAXException e) {
-						e.printStackTrace();
+						throw new ServletException(e);
 					}
 				}
 			}
