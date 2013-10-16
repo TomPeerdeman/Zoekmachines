@@ -10,7 +10,16 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SearchApplication</servlet-name>
-		<url-pattern>/search</url-pattern>
+		<url-pattern>/search/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>SearchApplicationUP</servlet-name>
+		<servlet-class>nl.uva.search.upload.UploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SearchApplicationUP</servlet-name>
+		<url-pattern>/upload</url-pattern>
 	</servlet-mapping>
 
 	<resource-ref>

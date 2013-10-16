@@ -5,6 +5,7 @@
 package nl.uva.search;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,6 +47,9 @@ public class SearchServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		Connection conn = null;
+		resp.setContentType("text/html");
+		PrintWriter out = resp.getWriter();
+		out.println(req.getPathInfo());
 		
 		try {
 			conn = db.getConnection();
@@ -55,11 +59,9 @@ public class SearchServlet extends HttpServlet {
 			throw new ServletException(e);
 		}
 		
-		resp.getOutputStream().write(
-				"<h1>Hello world from the app!</h1>".getBytes());
+		out.print("<h1>Hello world from the app!</h1>");
 		
-		resp.getOutputStream().write(
-				conn.toString().getBytes());
+		out.print(conn);
 		
 		Statement stm = null;
 		ResultSet res = null;
@@ -69,8 +71,7 @@ public class SearchServlet extends HttpServlet {
 				stm.executeQuery("SELECT * FROM documents WHERE doc_id='ABC'");
 			while(res.next()) {
 				for(int i = 0; i < res.getMetaData().getColumnCount(); i++) {
-					resp.getOutputStream().write(
-							("<br />\n" + res.getString(i + 1)).getBytes());
+					out.print("<br />\n" + res.getString(i + 1));
 				}
 			}
 		} catch(SQLException e1) {
@@ -101,5 +102,7 @@ public class SearchServlet extends HttpServlet {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
+		
+		out.flush();
 	}
 }
