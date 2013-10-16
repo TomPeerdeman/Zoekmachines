@@ -24,6 +24,7 @@ Advanced search:
 	<tr><td>Answerers ministry: </td><td><input type='text' name='answerers_ministry'/></td></tr>
 	</table>
 	<br>
+	<input type='hidden' name='advanced_query' />
 	<input type='submit' value='Search' />
 </form>
 </center>
