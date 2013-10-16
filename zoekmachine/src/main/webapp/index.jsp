@@ -1,7 +1,7 @@
 <html>
 <body>
-
-<h1>Welcome to Elgoog!</h1>
+<center>
+<img border="0" src="elgoog.jpg" width="327" height="264">
 <form method="POST" action="search">
 	<input type='text' name='query'/>
 	<input type='submit' value='Search' />
@@ -10,5 +10,6 @@
 <form method="POST" action="advanced">
 	<input type='submit' name='advanced' value='Advanced Search' />
 </form>
+</center
 </body>
 </html>
