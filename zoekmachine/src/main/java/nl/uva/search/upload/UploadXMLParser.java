@@ -140,10 +140,10 @@ public class UploadXMLParser extends DefaultHandler {
 				answers.append(escape(text.toString()));
 				answers.append(" ");
 			} else if(qName.equalsIgnoreCase("vrager")) {
-				questioners.append(escape(attr.get("partij")));
-				questioners.append(" ");
-				questioners_party.append(escape(text.toString()));
+				questioners_party.append(escape(attr.get("partij")));
 				questioners_party.append(" ");
+				questioners.append(escape(text.toString()));
+				questioners.append(" ");
 			} else if(qName.equalsIgnoreCase("antwoorder")) {
 				answerers_ministry.append(escape(attr.get("ministerie")));
 				answerers_ministry.append(" ");
