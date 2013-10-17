@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Enumeration;
 import java.util.Map;
 
 import javax.naming.Context;
@@ -52,11 +51,12 @@ public class SearchServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		Connection conn = null;
-		resp.setContentType("text/html");
-		PrintWriter out = resp.getWriter();
-		//out.println(req.getPathInfo());
+		if(!req.getParameter("adv").equals("true")) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
 		
+		Connection conn = null;
 		try {
 			conn = db.getConnection();
 		} catch(SQLException e) {
@@ -65,16 +65,20 @@ public class SearchServlet extends HttpServlet {
 			throw new ServletException(e);
 		}
 		
-		out.print(conn);
-		
 		Statement stm = null;
 		ResultSet res = null;
 		try {
 			stm = conn.createStatement();
-			res = stm.executeQuery("SELECT * FROM documents");
+			res =
+				stm.executeQuery("SELECT MAX(entering_date) AS emax, "
+						+ "MIN(entering_date) AS emin, "
+						+ "MAX(answering_date) AS amax, "
+						+ "MIN(answering_date) AS amin "
+						+ "FROM documents");
 			while(res.next()) {
 				for(int i = 0; i < res.getMetaData().getColumnCount(); i++) {
-					out.print("<br />\n" + res.getString(i + 1));
+					req.setAttribute(res.getMetaData().getColumnName(i + 1),
+							res.getString(i + 1));
 				}
 			}
 		} catch(SQLException e1) {
@@ -106,29 +110,53 @@ public class SearchServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		
-		out.flush();
+		// TODO: Change to advanced.jsp
+		RequestDispatcher view = req.getRequestDispatcher("/slider.jsp");
+		view.forward(req, resp);
 	}
 	
 	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-	    String forward="";
-	    // Get a map of the request parameters
-	    @SuppressWarnings("unchecked")
-	    Map parameters = req.getParameterMap();
-	    if (parameters.containsKey("advanced")) {
-	      forward = ADVANCED_JSP;
-		    RequestDispatcher view = req.getRequestDispatcher(forward);	
-		    view.forward(req, resp);
-	    }
-	    else if (parameters.containsKey("simple_query")){
+		String forward = "";
+		// Get a map of the request parameters
+		@SuppressWarnings("unchecked")
+		Map<String, String[]> parameters = req.getParameterMap();
+		if(parameters.containsKey("advanced")) {
+			forward = ADVANCED_JSP;
+			RequestDispatcher view = req.getRequestDispatcher(forward);
+			view.forward(req, resp);
+		}
+		else if(parameters.containsKey("simple_query")) {
 			Connection conn = null;
 			resp.setContentType("text/html");
 			PrintWriter out = resp.getWriter();
 			String input = req.getParameter("query");
-			String query = "SELECT *, MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('" + input + "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('" + input + "') ORDER BY Score DESC";
-					
+			
+			// Modify query with entering_date and answering_date
+			String andQuery = "";
+			if(parameters.containsKey("entering_max")
+					&& parameters.containsKey("entering_min")
+					&& parameters.containsKey("answering_max")
+					&& parameters.containsKey("answering_min")) {
+				andQuery =
+					" AND entering_date BETWEEN '"
+							+ req.getParameter("entering_min")
+							+ "' AND '"
+							+ req.getParameter("entering_max") + "'"
+							+ " AND answering_date BETWEEN '"
+							+ req.getParameter("answering_min")
+							+ "' AND '"
+							+ req.getParameter("answering_max") + "'";
+			}
+			
+			String query =
+				"SELECT *, MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+						+ input
+						+ "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+						+ input + "')" + andQuery + " ORDER BY Score DESC";
+			
 			try {
 				conn = db.getConnection();
 			} catch(SQLException e) {
@@ -136,6 +164,8 @@ public class SearchServlet extends HttpServlet {
 				e.printStackTrace();
 				throw new ServletException(e);
 			}
+			
+			out.print("<p>" + query + "</p>");
 			
 			Statement stm = null;
 			ResultSet res = null;
@@ -152,42 +182,42 @@ public class SearchServlet extends HttpServlet {
 					out.print("<td>");
 					out.print(j);
 					out.print("</td>");
-
-						// Doc ID
-						out.print("<td>");
-						out.print(res.getString(2));
-						out.print("</td>");
-						
-						// Title
-						out.print("<td>");
-						out.print(res.getString(3));
-						out.print("</td>");
-						
-						// Date of issue
-						out.print("<td>");
-						out.print(res.getString(6) + "-" + res.getString(7) + "-" + res.getString(8));
-						out.print("</td>");
-						
-						// Date of response
-						out.print("<td>");
-						out.print(res.getString(9) + "-" + res.getString(10) + "-" + res.getString(11));
-						out.print("</td>");
-						
-						// Issuer
-						out.print("<td>");
-						out.print(res.getString(16));
-						out.print("</td>");
-						
-						// Issuerś Party
-						out.print("<td>");
-						out.print(res.getString(17));
-						out.print("</td>");
-						
-						// Score
-						out.print("<td>");
-						out.print(res.getString(19));
-						out.print("</td>");
-
+					
+					// Doc ID
+					out.print("<td>");
+					out.print(res.getString(2));
+					out.print("</td>");
+					
+					// Title
+					out.print("<td>");
+					out.print(res.getString(3));
+					out.print("</td>");
+					
+					// Date of issue
+					out.print("<td>");
+					out.print(res.getString(13));
+					out.print("</td>");
+					
+					// Date of response
+					out.print("<td>");
+					out.print(res.getString(14));
+					out.print("</td>");
+					
+					// Issuer
+					out.print("<td>");
+					out.print(res.getString(10));
+					out.print("</td>");
+					
+					// Issuerś Party
+					out.print("<td>");
+					out.print(res.getString(11));
+					out.print("</td>");
+					
+					// Score
+					out.print("<td>");
+					out.print(res.getString(15));
+					out.print("</td>");
+					
 					out.print("</tr>");
 				}
 				out.print("</table>");
@@ -221,12 +251,12 @@ public class SearchServlet extends HttpServlet {
 			}
 			
 			out.flush();
-	    }
-	    else if (parameters.containsKey("advanced_query")){
-		    PrintWriter out = resp.getWriter();
+		}
+		else if(parameters.containsKey("advanced_query")) {
+			PrintWriter out = resp.getWriter();
 			String query = req.getParameter("query");
 			out.print("<h1>Advanced Results:</h1>");
 			out.print(query);
-	    }
+		}
 	}
 }

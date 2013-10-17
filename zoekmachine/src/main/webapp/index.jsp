@@ -11,6 +11,6 @@
 <form method="POST" action="advanced">
 	<input type='submit' name='advanced' value='Advanced Search' />
 </form>
-</center
+</center>
 </body>
 </html>

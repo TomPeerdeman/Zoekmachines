@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -24,8 +22,6 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class UploadXMLParser extends DefaultHandler {
 	private final Map<String, String> columnMapping;
-	private final Pattern datePattern =
-		Pattern.compile("^(\\d{4})-(\\d{1,2})-(\\d{1,2})$");
 	
 	private LinkedList<NameAttributePair> stack;
 	private Connection db;
@@ -53,6 +49,8 @@ public class UploadXMLParser extends DefaultHandler {
 		columnMapping.put("Rubriek", "category");
 		columnMapping.put("Document-id", "doc_id");
 		columnMapping.put("Trefwoorden", "keywords");
+		columnMapping.put("Datum_indiening", "entering_date");
+		columnMapping.put("Datum_reaktie", "answering_date");
 		
 		docDescr = new HashMap<String, String>();
 		
@@ -89,20 +87,6 @@ public class UploadXMLParser extends DefaultHandler {
 				
 				if(columnMapping.containsKey(itemAttr)) {
 					docDescr.put(columnMapping.get(itemAttr), text.toString());
-				} else if(itemAttr.equalsIgnoreCase("Datum_indiening")) {
-					Matcher m = datePattern.matcher(text);
-					if(m.matches()) {
-						docDescr.put("entering_year", "" + m.group(1));
-						docDescr.put("entering_month", "" + m.group(2));
-						docDescr.put("entering_day", "" + m.group(3));
-					}
-				} else if(itemAttr.equalsIgnoreCase("Datum_reaktie")) {
-					Matcher m = datePattern.matcher(text);
-					if(m.matches()) {
-						docDescr.put("answering_year", "" + m.group(1));
-						docDescr.put("answering_month", "" + m.group(2));
-						docDescr.put("answering_day", "" + m.group(3));
-					}
 				} else if(itemAttr.equalsIgnoreCase("Bibliografische_omschrijving")) {
 					// Parse title
 					int start = text.lastIndexOf("over");
