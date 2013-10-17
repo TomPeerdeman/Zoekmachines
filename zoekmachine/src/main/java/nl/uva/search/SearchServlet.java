@@ -51,7 +51,8 @@ public class SearchServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		if(!req.getParameter("adv").equals("true")) {
+		if(req.getParameter("adv") == null
+				|| !req.getParameter("adv").equals("true")) {
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			return;
 		}
@@ -140,6 +141,7 @@ public class SearchServlet extends HttpServlet {
 					&& parameters.containsKey("entering_min")
 					&& parameters.containsKey("answering_max")
 					&& parameters.containsKey("answering_min")) {
+				// TODO: See if parameter is actually a date
 				andQuery =
 					" AND entering_date BETWEEN '"
 							+ req.getParameter("entering_min")
@@ -165,25 +167,33 @@ public class SearchServlet extends HttpServlet {
 				throw new ServletException(e);
 			}
 			
-			out.print("<p>" + query + "</p>");
-			
 			Statement stm = null;
 			ResultSet res = null;
 			try {
 				stm = conn.createStatement();
 				res = stm.executeQuery(query);
-				out.print("<span style='float:left;'>" +
-							"<form method='POST' action='search'>" +
-								"<input type='hidden' name='simple_query' />" +
-								"<input type='text' name='query'/>" +
-								"<input type='submit' value='Search' />" +
-							"</form>" +
-						"</span>" +
-						"<span style='float:left;'>" +
-							"<form method='POST' action='advanced'>" +
-								"<input type='submit' name='advanced' value='Advanced Search' />" +
-							"</form>" +
-						"</span><br><br><br>");
+				// out.print("<span style='float:left;'>"
+				// +
+				// "<form method='POST' action='search'>"
+				// +
+				// "<input type='hidden' name='simple_query' />"
+				// +
+				// "<input type='text' name='query'/>"
+				// +
+				// "<input type='submit' value='Search' />"
+				// +
+				// "</form>"
+				// +
+				// "</span>"
+				// +
+				// "<span style='float:left;'>"
+				// +
+				// "<form method='POST' action='advanced'>"
+				// +
+				// "<input type='submit' name='advanced' value='Advanced Search' />"
+				// +
+				// "</form>" +
+				// "</span><br><br><br>");
 				out.print("<table border='1'>");
 				out.print("<tr><td>#</td><td>Document Id</td><td>Title</td><td>Date of Issue</td><td>Date of Response</td><td>Issuer</td><td>Issuer's Party</td><td>Score</td></tr>");
 				int j = 0;

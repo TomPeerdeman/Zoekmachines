@@ -13,6 +13,9 @@
 body {
 	text-align: center;
 }
+#result {
+	text-align: left;
+}
 </style>
 
 <script
@@ -38,7 +41,7 @@ body {
 		class="center">
 
 	<br> Advanced search:
-	<form method="POST" action="search">
+	<form method="POST" action="#" id="searchform">
 		<input type='hidden' name='simple_query' /> <input type="hidden"
 			name="entering_max" id="entering_max" value="<%=emax%>" /> <input
 			type="hidden" name="entering_min" id="entering_min" value="<%=emin%>" />
@@ -48,14 +51,14 @@ body {
 		<table border="1" class="center">
 			<tr>
 				<td>Query</td>
-				<td><input type='text' name='query' /></td>
+				<td><input type='text' name='query' id="query" /></td>
 			</tr>
 			<tr>
-				<td>Entering date:</td>
+				<td>Issue date:</td>
 				<td><div id="entering" style="margin: 5px;"></div></td>
 			</tr>
 			<tr>
-				<td>Answering date:</td>
+				<td>Answer date:</td>
 				<td><div id="answering" style="margin: 5px;"></div></td>
 			</tr>
 			<tr>
@@ -64,8 +67,8 @@ body {
 			</tr>
 		</table>
 	</form>
+	<div class="center" id="result"></div>
 	<script type="text/javascript">
-		// Months are range 0-11
 		$('#entering').dateRangeSlider({
 			bounds : {
 				min : new Date('<%=emin %>'),
@@ -107,6 +110,7 @@ body {
 					$('#entering_min').val(
 							dmin.getFullYear() + '-' + (dmin.getMonth() + 1)
 									+ '-' + dmin.getDate());
+					postdata();
 				});
 
 		$('#answering').on(
@@ -120,7 +124,29 @@ body {
 					$('#answering_min').val(
 							dmin.getFullYear() + '-' + (dmin.getMonth() + 1)
 									+ '-' + dmin.getDate());
+					postdata();
 				});
+		
+		$('#query').keyup(function(){
+			postdata();
+		});
+		
+		function postdata() {
+			$.ajax({
+				type: 'POST',
+				url: 'search',
+				data: $('#searchform').serialize(),
+				cache: false,
+				success: function(data) {
+					$('#result').html(data);
+				}
+			});
+		}
+		
+		$('#searchform').submit(function(){
+			postdata();
+			return false;
+		});
 	</script>
 	<%
 		}
