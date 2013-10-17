@@ -172,6 +172,18 @@ public class SearchServlet extends HttpServlet {
 			try {
 				stm = conn.createStatement();
 				res = stm.executeQuery(query);
+				out.print("<span style='float:left;'>" +
+							"<form method='POST' action='search'>" +
+								"<input type='hidden' name='simple_query' />" +
+								"<input type='text' name='query'/>" +
+								"<input type='submit' value='Search' />" +
+							"</form>" +
+						"</span>" +
+						"<span style='float:left;'>" +
+							"<form method='POST' action='advanced'>" +
+								"<input type='submit' name='advanced' value='Advanced Search' />" +
+							"</form>" +
+						"</span><br><br><br>");
 				out.print("<table border='1'>");
 				out.print("<tr><td>#</td><td>Document Id</td><td>Title</td><td>Date of Issue</td><td>Date of Response</td><td>Issuer</td><td>Issuer's Party</td><td>Score</td></tr>");
 				int j = 0;
