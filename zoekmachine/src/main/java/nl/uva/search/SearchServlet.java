@@ -111,8 +111,7 @@ public class SearchServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		
-		// TODO: Change to advanced.jsp
-		RequestDispatcher view = req.getRequestDispatcher("/slider.jsp");
+		RequestDispatcher view = req.getRequestDispatcher("/advanced.jsp");
 		view.forward(req, resp);
 	}
 	
@@ -260,81 +259,119 @@ public class SearchServlet extends HttpServlet {
 			String query = "SELECT * FROM documents ";
 			int where = 0;
 			
-			if (req.getParameter("doc_id").length() != 0) {
-				query += "WHERE doc_id LIKE '%" + req.getParameter("doc_id") + "%' ";
+			if(req.getParameter("doc_id").length() != 0) {
+				query +=
+					"WHERE doc_id LIKE '%" + req.getParameter("doc_id") + "%' ";
 				where = 1;
 			}
-			if (req.getParameter("title").length() != 0) {
-				if (where == 0) {
-					query += "WHERE title LIKE '%" + req.getParameter("title") + "%' ";
+			if(req.getParameter("title").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE title LIKE '%" + req.getParameter("title")
+								+ "%' ";
 					where = 1;
 				}
 				else
-					query += "AND title LIKE '%" + req.getParameter("title") + "%' ";			
+					query +=
+						"AND title LIKE '%" + req.getParameter("title") + "%' ";
 			}
-			if (req.getParameter("category").length() != 0) {
-				if (where == 0) {
-					query += "WHERE category LIKE '%" + req.getParameter("category") + "%' ";
+			if(req.getParameter("category").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE category LIKE '%" + req.getParameter("category")
+								+ "%' ";
 					where = 1;
 				}
 				else
-					query += "AND category LIKE '%" + req.getParameter("category") + "%' ";			
+					query +=
+						"AND category LIKE '%" + req.getParameter("category")
+								+ "%' ";
 			}
-			if (req.getParameter("questions").length() != 0) {
-				if (where == 0) {
-					query += "WHERE questions LIKE '%" + req.getParameter("questions") + "%' ";
+			if(req.getParameter("questions").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE questions LIKE '%"
+								+ req.getParameter("questions") + "%' ";
 					where = 1;
 				}
 				else
-					query += "AND questions LIKE '%" + req.getParameter("questions") + "%' ";			
+					query +=
+						"AND questions LIKE '%" + req.getParameter("questions")
+								+ "%' ";
 			}
-			if (req.getParameter("answers").length() != 0) {
-				if (where == 0) {
-					query += "WHERE answers LIKE '%" + req.getParameter("answers") + "%' ";
+			if(req.getParameter("answers").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE answers LIKE '%" + req.getParameter("answers")
+								+ "%' ";
 					where = 1;
 				}
 				else
-					query += "AND answers LIKE '%" + req.getParameter("answers") + "%' ";			
+					query +=
+						"AND answers LIKE '%" + req.getParameter("answers")
+								+ "%' ";
 			}
-			if (req.getParameter("answerers").length() != 0) {
-				if (where == 0) {
-					query += "WHERE answerers LIKE '%" + req.getParameter("answerers") + "%' ";
+			if(req.getParameter("answerers").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE answerers LIKE '%"
+								+ req.getParameter("answerers") + "%' ";
 					where = 1;
 				}
 				else
-					query += "AND answerers LIKE '%" + req.getParameter("answerers") + "%' ";			
+					query +=
+						"AND answerers LIKE '%" + req.getParameter("answerers")
+								+ "%' ";
 			}
-			if (req.getParameter("keywords").length() != 0) {
-				if (where == 0) {
-					query += "WHERE keywords LIKE '%" + req.getParameter("keywords") + "%' ";
+			if(req.getParameter("keywords").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE keywords LIKE '%" + req.getParameter("keywords")
+								+ "%' ";
 					where = 1;
 				}
 				else
-					query += "AND keywords LIKE '%" + req.getParameter("keywords") + "%' ";			
+					query +=
+						"AND keywords LIKE '%" + req.getParameter("keywords")
+								+ "%' ";
 			}
-			if (req.getParameter("questioners").length() != 0) {
-				if (where == 0) {
-					query += "WHERE questioners LIKE '%" + req.getParameter("questioners") + "%' ";
+			if(req.getParameter("questioners").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE questioners LIKE '%"
+								+ req.getParameter("questioners") + "%' ";
 					where = 1;
 				}
 				else
-					query += "AND questioners LIKE '%" + req.getParameter("questioners") + "%' ";			
+					query +=
+						"AND questioners LIKE '%"
+								+ req.getParameter("questioners") + "%' ";
 			}
-			if (req.getParameter("questioners_party").length() != 0) {
-				if (where == 0) {
-					query += "WHERE questioners_party LIKE '%" + req.getParameter("questioners_party") + "%' ";
+			if(req.getParameter("questioners_party").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE questioners_party LIKE '%"
+								+ req.getParameter("questioners_party") + "%' ";
 					where = 1;
 				}
 				else
-					query += "AND questioners_party LIKE '%" + req.getParameter("questioners_party") + "%' ";			
+					query +=
+						"AND questioners_party LIKE '%"
+								+ req.getParameter("questioners_party") + "%' ";
 			}
-			if (req.getParameter("answerers_ministry").length() != 0) {
-				if (where == 0) {
-					query += "WHERE answerers_ministry LIKE '%" + req.getParameter("answerers_ministry") + "%' ";
+			if(req.getParameter("answerers_ministry").length() != 0) {
+				if(where == 0) {
+					query +=
+						"WHERE answerers_ministry LIKE '%"
+								+ req.getParameter("answerers_ministry")
+								+ "%' ";
 					where = 1;
 				}
 				else
-					query += "AND answerers_ministry LIKE '%" + req.getParameter("answerers_ministry") + "%' ";			
+					query +=
+						"AND answerers_ministry LIKE '%"
+								+ req.getParameter("answerers_ministry")
+								+ "%' ";
 			}
 			
 			try {
@@ -394,7 +431,7 @@ public class SearchServlet extends HttpServlet {
 					
 					// Score
 					out.print("<td>");
-					//out.print(res.getString(15));
+					// out.print(res.getString(15));
 					out.print("</td>");
 					
 					out.print("</tr>");

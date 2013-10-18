@@ -4,19 +4,7 @@
 <meta charset="utf-8" />
 <title>Slider</title>
 <link href="css/classic-min.css" rel="stylesheet">
-<style type="text/css">
-.center {
-	margin-left: auto;
-	margin-right: auto;
-}
-
-body {
-	text-align: center;
-}
-#result {
-	text-align: left;
-}
-</style>
+<link href="css/base.css" rel="stylesheet">
 
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"
@@ -37,33 +25,75 @@ body {
 			out.println("Date values not set!");
 		} else {
 	%>
-	<img border="0" src="elgoog.jpg" style="width: 327px; height: 265px;"
-		class="center">
+	<img src="elgoog.jpg" id="logo" class="center">
 
-	<br> Advanced search:
 	<form method="POST" action="#" id="searchform">
-		<input type='hidden' name='simple_query' /> <input type="hidden"
-			name="entering_max" id="entering_max" value="<%=emax%>" /> <input
-			type="hidden" name="entering_min" id="entering_min" value="<%=emin%>" />
-		<input type="hidden" name="answering_max" id="answering_max"
+		<input type='hidden' name='simple_query' id="simple_query"
+			value="true" /> <input type="hidden" name="entering_max"
+			id="entering_max" value="<%=emax%>" /> <input type="hidden"
+			name="entering_min" id="entering_min" value="<%=emin%>" /> <input
+			type="hidden" name="answering_max" id="answering_max"
 			value="<%=amax%>" /> <input type="hidden" name="answering_min"
 			id="answering_min" value="<%=amin%>" />
-		<table border="1" class="center">
+			
+		<table class="center" id="simpletable">
 			<tr>
-				<td>Query</td>
-				<td><input type='text' name='query' id="query" /></td>
+				<td colspan="2"><input type='text' name='query' /></td>
 			</tr>
 			<tr>
+				<td><input type='submit' id="submit_simple" value='Search' /></td>
+				<td><input type='button' id="advanced_button"
+					value='Advanced search' /></td>
+			</tr>
+		</table>
+
+		<table class="center" id="advtable">
+			<tr>
+				<td>Doc ID:</td>
+				<td><input type='text' name='doc_id' /></td>
+				<td rowspan="6">&nbsp;</td>
+				<td>Questions:</td>
+				<td><input type='text' name='questions' /></td>
+			</tr>
+			<tr>
+				<td>Title :</td>
+				<td><input type='text' name='title' /></td>
+				<td>Questioners:</td>
+				<td><input type='text' name='questioners' /></td>
+			</tr>
+			<tr>
+				<td>Category:</td>
+				<td><input type='text' name='category' /></td>
+				<td>Questioners party:</td>
+				<td><input type='text' name='questioners_party' /></td>
+			</tr>
+			<tr>
+				<td>Answers:</td>
+				<td><input type='text' name='answers' /></td>
 				<td>Issue date:</td>
 				<td><div id="entering" style="margin: 5px;"></div></td>
 			</tr>
 			<tr>
+				<td>Answerers:</td>
+				<td><input type='text' name='answerers' /></td>
 				<td>Answer date:</td>
 				<td><div id="answering" style="margin: 5px;"></div></td>
 			</tr>
 			<tr>
+				<td>Answerers ministry:</td>
+				<td><input type='text' name='answerers_ministry' /></td>
+				<td>Keywords:</td>
+				<td><input type='text' name='keywords' /></td>
+			</tr>
+			<tr>
+				<td colspan="4">&nbsp;</td>
+			</tr>
+			<tr>
 				<td>&nbsp;</td>
-				<td><input type='submit' value='Search' /></td>
+				<td><input type='submit' id="submit_advanced" value='Search' /></td>
+				<td>&nbsp;</td>
+				<td><input type='button' id="simple_button"
+					value='Simple search' /></td>
 			</tr>
 		</table>
 	</form>
@@ -71,12 +101,12 @@ body {
 	<script type="text/javascript">
 		$('#entering').dateRangeSlider({
 			bounds : {
-				min : new Date('<%=emin %>'),
-				max : new Date('<%=emax %>')
+				min : new Date('<%=emin%>'),
+				max : new Date('<%=emax%>')
 			},
 			defaultValues : {
-				min : new Date('<%=emin %>'),
-				max : new Date('<%=emax %>')
+				min : new Date('<%=emin%>'),
+				max : new Date('<%=emax%>')
 			},
 			arrows : false,
 			valueLabels : "change",
@@ -86,12 +116,12 @@ body {
 
 		$('#answering').dateRangeSlider({
 			bounds : {
-				min : new Date('<%=amin %>'),
-				max : new Date('<%=amax %>')
+				min : new Date('<%=amin%>'),
+				max : new Date('<%=amax%>')
 			},
 			defaultValues : {
-				min : new Date('<%=amin %>'),
-				max : new Date('<%=amax %>')
+				min : new Date('<%=amin%>'),
+				max : new Date('<%=amax%>')
 			},
 			arrows : false,
 			valueLabels : "change",
@@ -126,27 +156,34 @@ body {
 									+ '-' + dmin.getDate());
 					postdata();
 				});
-		
-		$('#query').keyup(function(){
+
+		$('#query').keyup(function() {
 			postdata();
 		});
-		
+
 		function postdata() {
 			$.ajax({
-				type: 'POST',
-				url: 'search',
-				data: $('#searchform').serialize(),
-				cache: false,
-				success: function(data) {
+				type : 'POST',
+				url : 'search',
+				data : $('#searchform').serialize(),
+				cache : false,
+				success : function(data) {
 					$('#result').html(data);
 				}
 			});
 		}
-		
-		$('#searchform').submit(function(){
+
+		$('#searchform').submit(function() {
 			postdata();
 			return false;
 		});
+		
+		$('#advanced_button').click(function() {
+			$('#simpletable').hide();
+			$('#advtable').show();
+		});
+		
+		$('#advtable').hide();
 	</script>
 	<%
 		}
