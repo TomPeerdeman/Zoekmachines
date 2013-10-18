@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -21,6 +22,8 @@ import org.xml.sax.helpers.DefaultHandler;
  * 
  */
 public class UploadXMLParser extends DefaultHandler {
+	private final Pattern numberPattern = Pattern.compile("^\\d+$");
+	
 	private final Map<String, String> columnMapping;
 	
 	private LinkedList<NameAttributePair> stack;
@@ -47,7 +50,6 @@ public class UploadXMLParser extends DefaultHandler {
 		columnMapping = new HashMap<String, String>();
 		columnMapping.put("Inhoud", "contents");
 		columnMapping.put("Rubriek", "category");
-		columnMapping.put("Document-id", "doc_id");
 		columnMapping.put("Trefwoorden", "keywords");
 		columnMapping.put("Datum_indiening", "entering_date");
 		columnMapping.put("Datum_reaktie", "answering_date");
@@ -89,10 +91,12 @@ public class UploadXMLParser extends DefaultHandler {
 					docDescr.put(columnMapping.get(itemAttr), text.toString());
 				} else if(itemAttr.equalsIgnoreCase("Bibliografische_omschrijving")) {
 					// Parse title
-					int start = text.lastIndexOf("over");
+					String titleText = text.toString();
+					
+					int start = titleText.lastIndexOf("over");
 					start += 5;
 					if(start < 5) {
-						start = text.lastIndexOf("inzake");
+						start = titleText.lastIndexOf("inzake");
 						start += 7;
 						if(start < 7) {
 							start = -1;
@@ -100,17 +104,34 @@ public class UploadXMLParser extends DefaultHandler {
 					}
 					
 					if(start > 5) {
-						int end = text.lastIndexOf("(");
-						System.out.printf("Title end %d\n", end);
+						int end = titleText.lastIndexOf("(");
+						if(end < 0 || start + 1 >= end) {
+							end = titleText.length();
+						}
+						
 						if(end > 0) {
 							String title =
-								text.substring(start + 1, end);
+								titleText.substring(start + 1, end);
 							// Add capitalized first letter
 							title =
-								text.substring(start, start + 1).toUpperCase()
+								titleText.substring(start, start + 1)
+											.toUpperCase()
 										+ title;
-							docDescr.put("title", escape(title));
+							title = title.trim();
+							if(title.endsWith(".")) {
+								title = title.substring(0, title.length() - 1);
+							}
+							docDescr.put("title", title);
 						}
+					}
+				} else if(itemAttr.equalsIgnoreCase("Document-id")) {
+					if(numberPattern.matcher(text).matches()) {
+						// Only numbers in doc id, prefix with SG_KVR
+						docDescr.put("doc_id",
+								"SG_KVR" + escape(text.toString()));
+					} else {
+						// Insert as is
+						docDescr.put("doc_id", escape(text.toString()));
 					}
 				}
 			} else if(qName.equalsIgnoreCase("vraag")) {
@@ -125,25 +146,30 @@ public class UploadXMLParser extends DefaultHandler {
 				answers.append(" ");
 			} else if(qName.equalsIgnoreCase("vrager")) {
 				questioners_party.append(escape(attr.get("partij")));
-				questioners_party.append(" ");
+				questioners_party.append(", ");
 				questioners.append(escape(text.toString()));
-				questioners.append(" ");
+				questioners.append(", ");
 			} else if(qName.equalsIgnoreCase("antwoorder")) {
 				answerers_ministry.append(escape(attr.get("ministerie")));
-				answerers_ministry.append(" ");
+				answerers_ministry.append(", ");
 				answerers.append(escape(text.toString()));
-				answerers.append(" ");
+				answerers.append(", ");
 			} else if(qName.equalsIgnoreCase("kvr")) {
 				// End of document
 				
 				docDescr.put("questions", questions.toString());
-				docDescr.put("questioners", questioners.toString());
-				docDescr.put("questioners_party", questioners_party.toString());
+				docDescr.put("questioners", questioners.toString().substring(0,
+						questioners.length() - 2));
+				docDescr.put("questioners_party",
+						questioners_party.toString().substring(0,
+								questioners_party.length() - 2));
 				
 				docDescr.put("answers", answers.toString());
-				docDescr.put("answerers", answerers.toString());
+				docDescr.put("answerers", answerers.toString().substring(0,
+						answerers.length() - 2));
 				docDescr.put("answerers_ministry",
-						answerers_ministry.toString());
+						answerers_ministry.toString().substring(0,
+								answerers_ministry.length() - 2));
 				
 				insertDocument();
 			}
@@ -160,11 +186,14 @@ public class UploadXMLParser extends DefaultHandler {
 		String cols = "";
 		String values = "";
 		for(Entry<String, String> e : docDescr.entrySet()) {
+			if(e.getKey().equals("answering_date")
+					&& e.getValue().equals("99-99-9999")) {
+				continue;
+			}
+			
 			cols += e.getKey() + ", ";
 			values += "'" + escape(e.getValue()) + "', ";
 		}
-		
-		System.out.println(values);
 		
 		if(cols.length() > 0 && values.length() > 0) {
 			cols = cols.substring(0, cols.length() - 2);
@@ -176,7 +205,9 @@ public class UploadXMLParser extends DefaultHandler {
 				stm.execute("INSERT INTO documents (" + cols + ")  VALUES ("
 						+ values + ")");
 			} catch(SQLException e) {
-				throw new SAXException(e);
+				throw new SAXException("Query: " + "INSERT INTO documents ("
+						+ cols + ")  VALUES ("
+						+ values + ")\nError: " + e);
 			} finally {
 				if(stm != null) {
 					try {
@@ -189,7 +220,7 @@ public class UploadXMLParser extends DefaultHandler {
 	}
 	
 	private String escape(String val) {
-		return val.trim().replaceAll("'", "");
+		return val.trim().replaceAll("'|\\\\", "");
 	}
 	
 	private class NameAttributePair {
