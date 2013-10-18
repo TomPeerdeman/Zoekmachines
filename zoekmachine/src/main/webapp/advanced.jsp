@@ -9,12 +9,8 @@ Advanced search:
 	<tr><td>Doc ID: </td><td><input type='text' name='doc_id'/></td></tr>
 	<tr><td>Title :</td><td><input type='text' name='title'/></td></tr>
 	<tr><td>Category: </td><td><input type='text' name='category'/></td></tr>
-	<tr><td>Entering year: </td><td><input type='text' name='entering_year'/></td></tr>
-	<tr><td>Entering month: </td><td><input type='text' name='entering_month'/></td></tr>
-	<tr><td>Entering day: </td><td><input type='text' name='entering_day'/></td></tr>
-	<tr><td>Answering year: </td><td><input type='text' name='answering_year'/></td></tr>
-	<tr><td>Answering month: </td><td><input type='text' name='answering_month'/></td></tr>
-	<tr><td>Answering day: </td><td><input type='text' name='answering_day'/></td></tr>
+	<tr><td>Date of Issue: </td><td><input type='text' name='issue_date'/></td></tr>
+	<tr><td>Date of Answer: </td><td><input type='text' name='answer_date'/></td></tr>
 	<tr><td>Questions: </td><td><input type='text' name='questions'/></td></tr>
 	<tr><td>Answers: </td><td><input type='text' name='answers'/></td></tr>
 	<tr><td>Answerers: </td><td><input type='text' name='answerers'/></td></tr>
