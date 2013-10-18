@@ -47,7 +47,7 @@
 			<tr>
 				<td>Title :</td>
 				<td><input type='text' name='title' /></td>
-				<td>Questioners:</td>
+				<td>Questioner(s):</td>
 				<td><input type='text' name='questioners' /></td>
 			</tr>
 			<tr>
@@ -63,7 +63,7 @@
 				<td><div id="entering" style="margin: 5px;"></div></td>
 			</tr>
 			<tr>
-				<td>Answerers:</td>
+				<td>Answerer(s):</td>
 				<td><input type='text' name='answerers' /></td>
 				<td>Answer date:</td>
 				<td><div id="answering" style="margin: 5px;"></div></td>
