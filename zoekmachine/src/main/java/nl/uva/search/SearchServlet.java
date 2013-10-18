@@ -137,6 +137,7 @@ public class SearchServlet extends HttpServlet {
 			PrintWriter out = resp.getWriter();
 			
 			String query = null;
+			String order = "";
 			if(simple) {
 				String input = req.getParameter("query");
 				query =
@@ -145,9 +146,23 @@ public class SearchServlet extends HttpServlet {
 							+ "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 							+ input + "') ORDER BY Score DESC";
 			} else {
-				query = "SELECT * FROM documents ";
-				boolean where = false;
+				String match_against = "";
+				if (req.getParameter("questions").length() != 0 && req.getParameter("answers").length() != 0) {
+					match_against = ",(MATCH questions AGAINST ('%" + req.getParameter("questions") + "%') + MATCH answers AGAINST ('%" + req.getParameter("answers") + "%')) AS score ";
+					order = "ORDER BY score DESC";
+				}
+				else if (req.getParameter("questions").length() != 0) {
+					match_against = ",(MATCH questions AGAINST ('%" + req.getParameter("questions") + "%')) AS score ";
+					order = "ORDER BY score DESC";
+				}
+				else if (req.getParameter("answers").length() != 0) {
+					match_against = ",(MATCH answers AGAINST ('%" + req.getParameter("answers") + "%')) AS score ";
+					order = "ORDER BY score DESC";
+				}
 				
+				query = "SELECT *" + match_against + "FROM documents ";
+				boolean where = false;
+
 				if(req.getParameter("doc_id").length() != 0) {
 					query +=
 						"WHERE doc_id LIKE '%" + req.getParameter("doc_id")
@@ -183,28 +198,29 @@ public class SearchServlet extends HttpServlet {
 				if(req.getParameter("questions").length() != 0) {
 					if(!where) {
 						query +=
-							"WHERE questions LIKE '%"
-									+ req.getParameter("questions") + "%' ";
+							"WHERE MATCH questions AGAINST ('%"
+									+ req.getParameter("questions") + "%') ";
 						where = true;
 					}
-					else
+					else {
 						query +=
-							"AND questions LIKE '%"
+							"AND MATCH questions AGAINST ('%"
 									+ req.getParameter("questions")
-									+ "%' ";
+									+ "%') ";
+					}
 				}
 				if(req.getParameter("answers").length() != 0) {
 					if(!where) {
 						query +=
-							"WHERE answers LIKE '%"
+							"WHERE MATCH answers AGAINST ('%"
 									+ req.getParameter("answers")
-									+ "%' ";
+									+ "%') ";
 						where = true;
 					}
 					else
 						query +=
-							"AND answers LIKE '%" + req.getParameter("answers")
-									+ "%' ";
+							"AND MATCH answers AGAINST ('%" + req.getParameter("answers")
+									+ "%') ";
 				}
 				if(req.getParameter("answerers").length() != 0) {
 					if(!where) {
@@ -297,6 +313,7 @@ public class SearchServlet extends HttpServlet {
 								+ req.getParameter("answering_max") + "' ";
 				}
 			}
+			query += order;
 			
 			Statement stm = null;
 			ResultSet res = null;
