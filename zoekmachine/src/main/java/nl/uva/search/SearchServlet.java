@@ -146,7 +146,8 @@ public class SearchServlet extends HttpServlet {
 							+ input
 							+ "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 							+ input + "') ORDER BY Score DESC";
-				count_query = "SELECT COUNT(*) as results FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+				count_query =
+					"SELECT COUNT(*) as results FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 							+ input
 							+ "')";
 			} else {
@@ -331,11 +332,12 @@ public class SearchServlet extends HttpServlet {
 				}
 				String[] parts = query.split("WHERE");
 				String query_substring = parts[parts.length - 1];
-				count_query = "SELECT COUNT(*) as results FROM documents WHERE " + query_substring;
+				count_query =
+					"SELECT COUNT(*) as results FROM documents WHERE "
+							+ query_substring;
 			}
-
-			query += order + " LIMIT 50";
 			
+			query += order + " LIMIT 50";
 			
 			Statement stm = null;
 			ResultSet res = null;
@@ -347,8 +349,6 @@ public class SearchServlet extends HttpServlet {
 				stm_count = conn.createStatement();
 				res_count = stm_count.executeQuery(count_query);
 				res_count.next();
-
-				
 				
 				if(res_count.getInt(1) == 0) {
 					out.print("<center>Your search did not match any documents</center");
@@ -358,7 +358,8 @@ public class SearchServlet extends HttpServlet {
 				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<font size='2' color='grey'>" + res_count.getInt(1) + " results found</font>");
+				out.print("<font size='2' color='grey'>" + res_count.getInt(1)
+						+ " results found</font>");
 				out.print("</td>");
 				out.print("</tr>");
 				int j = 0;
@@ -366,13 +367,17 @@ public class SearchServlet extends HttpServlet {
 					j++;
 					out.print("<tr>");
 					out.print("<td>");
-					out.print("<a href=''>" + res.getString(3) + "</a>");
+					out.print("<a href='http://polidocs.nl/XML/KVR/"
+							+ res.getString(2) + ".xml'>" + res.getString(3)
+							+ "</a>");
 					out.print("</td>");
 					out.print("</tr>");
 					
 					out.print("<tr>");
 					out.print("<td>");
-					out.print("<font size='2'> By: " + res.getString(10) + " (" + res.getString(11) + ") on " + res.getString(13) + "</font>");
+					out.print("<font size='2'> By: " + res.getString(10) + " ("
+							+ res.getString(11) + ") on " + res.getString(13)
+							+ "</font>");
 					out.print("</td>");
 					out.print("</tr>");
 					
@@ -381,52 +386,54 @@ public class SearchServlet extends HttpServlet {
 					out.print("<br>");
 					out.print("</td>");
 					out.print("</tr>");
-					/*out.print("<tr>");
-					
-					out.print("<td>");
-					out.print(j);
-					out.print("</td>");
-					
-					// Doc ID
-					out.print("<td>");
-					out.print(res.getString(2));
-					out.print("</td>");
-					
-					// Title
-					out.print("<td>");
-					out.print(res.getString(3));
-					out.print("</td>");
-					
-					// Date of issue
-					out.print("<td>");
-					out.print(res.getString(13));
-					out.print("</td>");
-					
-					// Date of response
-					out.print("<td>");
-					out.print(res.getString(14));
-					out.print("</td>");
-					
-					// Issuer
-					out.print("<td>");
-					out.print(res.getString(10));
-					out.print("</td>");
-					
-					// Issuerś Party
-					out.print("<td>");
-					out.print(res.getString(11));
-					out.print("</td>");
-					
-					// Score
-					if(res.getMetaData().getColumnCount() >= 15) {
-						out.print("<td>");
-						out.print(res.getString(15));
-						out.print("</td>");
-					} else {
-						out.print("<td>0</td>");
-					}
-					
-					out.print("</tr>");*/
+					/*
+					 * out.print("<tr>");
+					 * 
+					 * out.print("<td>");
+					 * out.print(j);
+					 * out.print("</td>");
+					 * 
+					 * // Doc ID
+					 * out.print("<td>");
+					 * out.print(res.getString(2));
+					 * out.print("</td>");
+					 * 
+					 * // Title
+					 * out.print("<td>");
+					 * out.print(res.getString(3));
+					 * out.print("</td>");
+					 * 
+					 * // Date of issue
+					 * out.print("<td>");
+					 * out.print(res.getString(13));
+					 * out.print("</td>");
+					 * 
+					 * // Date of response
+					 * out.print("<td>");
+					 * out.print(res.getString(14));
+					 * out.print("</td>");
+					 * 
+					 * // Issuer
+					 * out.print("<td>");
+					 * out.print(res.getString(10));
+					 * out.print("</td>");
+					 * 
+					 * // Issuerś Party
+					 * out.print("<td>");
+					 * out.print(res.getString(11));
+					 * out.print("</td>");
+					 * 
+					 * // Score
+					 * if(res.getMetaData().getColumnCount() >= 15) {
+					 * out.print("<td>");
+					 * out.print(res.getString(15));
+					 * out.print("</td>");
+					 * } else {
+					 * out.print("<td>0</td>");
+					 * }
+					 * 
+					 * out.print("</tr>");
+					 */
 				}
 				out.print("</table>");
 			} catch(SQLException e1) {
