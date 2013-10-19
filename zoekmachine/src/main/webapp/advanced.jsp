@@ -146,18 +146,6 @@
 					// postdata();
 				});
 
-		function postdata() {
-			$.ajax({
-				type : 'POST',
-				url : 'search',
-				data : $('#searchform').serialize(),
-				cache : false,
-				success : function(data) {
-					$('#result').html(data);
-				}
-			});
-		}
-
 		$('#searchform').submit(function() {
 			postdata();
 			return false;
