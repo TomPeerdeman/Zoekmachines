@@ -8,6 +8,7 @@
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"
 	type="text/javascript"></script>
+
 </head>
 <body>
 	<img src="elgoog.jpg" id="logo" class="center">
@@ -49,6 +50,22 @@
 		$('#advanced_button').click(function() {
 			window.location.href = 'search?adv=true';
 		});
+		
+		function postdata() {
+			$.ajax({
+				type : 'POST',
+				url : 'search',
+				data : $('#searchform').serialize(),
+				cache : false,
+				success : function(data) {
+					$('#result').html(data);
+					$(".toggle").click(function() {
+						var myClasses = this.classList;
+						$("p."+myClasses[1]).toggle();
+					});
+				}
+			});
+		}
 	</script>
 </body>
 </html>
