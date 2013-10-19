@@ -333,12 +333,30 @@ public class SearchServlet extends HttpServlet {
 			try {
 				stm = conn.createStatement();
 				res = stm.executeQuery(query);
-				out.print("<table border='1'>");
-				out.print("<tr><td>#</td><td>Document Id</td><td>Title</td><td>Date of Issue</td><td>Date of Response</td><td>Issuer</td><td>Issuer's Party</td><td>Score</td></tr>");
+				
+				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+				//out.print("<tr><td>#</td><td>Document Id</td><td>Title</td><td>Date of Issue</td><td>Date of Response</td><td>Issuer</td><td>Issuer's Party</td><td>Score</td></tr>");
 				int j = 0;
 				while(res.next()) {
 					j++;
 					out.print("<tr>");
+					out.print("<td>");
+					out.print("<a href=''>" + res.getString(3) + "</a>");
+					out.print("</td>");
+					out.print("</tr>");
+					
+					out.print("<tr>");
+					out.print("<td>");
+					out.print("<font size='2'> By: " + res.getString(10) + " (" + res.getString(11) + ") on " + res.getString(13) + "</font>");
+					out.print("</td>");
+					out.print("</tr>");
+					
+					out.print("<tr>");
+					out.print("<td>");
+					out.print("<br>");
+					out.print("</td>");
+					out.print("</tr>");
+					/*out.print("<tr>");
 					
 					out.print("<td>");
 					out.print(j);
@@ -383,7 +401,7 @@ public class SearchServlet extends HttpServlet {
 						out.print("<td>0</td>");
 					}
 					
-					out.print("</tr>");
+					out.print("</tr>");*/
 				}
 				out.print("</table>");
 			} catch(SQLException e1) {
