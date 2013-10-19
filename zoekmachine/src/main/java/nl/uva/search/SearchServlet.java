@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -22,6 +23,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.time.Month;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 
 /**
  * @author Ruben Janssen
@@ -49,9 +60,12 @@ public class SearchServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		if(req.getParameter("adv") == null
+		if(req.getPathInfo().startsWith("/chart")) {
+			generateChart(req, resp);
+			return;
+		} else if(req.getParameter("adv") == null
 				|| !req.getParameter("adv").equals("true")) {
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			resp.sendRedirect("/");
 			return;
 		}
 		
@@ -113,6 +127,88 @@ public class SearchServlet extends HttpServlet {
 		view.forward(req, resp);
 	}
 	
+	/**
+	 * @param req
+	 * @param resp
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void generateChart(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		Connection conn = null;
+		try {
+			conn = db.getConnection();
+		} catch(SQLException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			throw new ServletException(e);
+		}
+		
+		TimeSeries series = new TimeSeries("Issue count");
+		
+		Statement stm = null;
+		ResultSet res = null;
+		try {
+			stm = conn.createStatement();
+			res =
+				stm.executeQuery("SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
+						+ "FROM documents "
+						+ "WHERE entering_date IS NOT NULL "
+						+ "GROUP BY year, month "
+						+ "ORDER BY year, month");
+			while(res.next()) {
+				System.out.printf("%d-%d: %d\n", res.getInt(3), res.getInt(2),
+						res.getInt(1));
+				series.add(new Month(res.getInt(3), res.getInt(2)),
+						res.getInt(1));
+			}
+		} catch(SQLException e1) {
+			e1.printStackTrace();
+			throw new ServletException(e1);
+		} finally {
+			// Close statement
+			if(stm != null) {
+				try {
+					stm.close();
+				} catch(SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			// Close result
+			if(res != null) {
+				try {
+					res.close();
+				} catch(SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			try {
+				conn.close();
+			} catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		TimeSeriesCollection timeColl = new TimeSeriesCollection();
+		timeColl.addSeries(series);
+		
+		JFreeChart chart =
+			ChartFactory.createXYBarChart("", "Issue date", true,
+					"# of documents",
+					timeColl, PlotOrientation.VERTICAL, false, false, false);
+		
+		XYBarRenderer renderer =
+			(XYBarRenderer) chart.getXYPlot().getRenderer();
+		renderer.setShadowVisible(false);
+		renderer.setDrawBarOutline(false);
+		renderer.setBarPainter(new StandardXYBarPainter());
+		
+		resp.setContentType("image/png");
+		ChartUtilities.writeChartAsPNG(resp.getOutputStream(), chart, 500, 300);
+	}
+	
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -122,6 +218,17 @@ public class SearchServlet extends HttpServlet {
 		
 		if(parameters.containsKey("simple_query")) {
 			boolean simple = req.getParameter("simple_query").equals("true");
+			
+			String getQuery = "?";
+			for(Entry<String, String[]> e : parameters.entrySet()) {
+				if(e.getValue() != null && e.getValue().length > 0
+						&& e.getValue()[0].length() > 0) {
+					getQuery += e.getKey() + "=" + e.getValue()[0] + "&";
+				}
+			}
+			if(getQuery.length() > 1) {
+				getQuery = getQuery.substring(0, getQuery.length() - 1);
+			}
 			
 			// Open db connection
 			Connection conn = null;
@@ -350,6 +457,9 @@ public class SearchServlet extends HttpServlet {
 				res_count = stm_count.executeQuery(count_query);
 				res_count.next();
 				
+				out.println("<img src=\"search/chart/" + getQuery
+						+ "\" id=\"logo\" class=\"center\">");
+				
 				if(res_count.getInt(1) == 0) {
 					out.print("<center>Your search did not match any documents</center");
 					return;
@@ -368,7 +478,8 @@ public class SearchServlet extends HttpServlet {
 					out.print("<tr>");
 					out.print("<td>");
 					out.print("<a href='http://polidocs.nl/XML/KVR/"
-							+ res.getString(2) + ".xml'>" + res.getString(3)
+							+ res.getString(2) + ".xml' target='_blank'>"
+							+ res.getString(3)
 							+ "</a>");
 					out.print("</td>");
 					out.print("</tr>");
