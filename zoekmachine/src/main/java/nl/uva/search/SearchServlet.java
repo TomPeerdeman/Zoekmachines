@@ -673,7 +673,8 @@ public class SearchServlet extends HttpServlet {
 					
 					out.print("<tr>");
 					out.print("<td>");
-					out.print("<font size='2'> By: " + res.getString(10) + " ("
+					out.print("<font size='2'>Document: " + res.getString(2)
+							+ "<br />By: " + res.getString(10) + " ("
 							+ res.getString(11) + ") on " + res.getString(13)
 							+ "</font>");
 					out.print("</td>");

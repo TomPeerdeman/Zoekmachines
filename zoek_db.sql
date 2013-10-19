@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: localhost
--- Genereertijd: 18 okt 2013 om 20:11
+-- Genereertijd: 19 okt 2013 om 23:40
 -- Serverversie: 5.5.32-0ubuntu0.13.04.1
 -- PHP-versie: 5.4.9-4ubuntu2.3
 
@@ -26,10 +26,9 @@ SET time_zone = "+00:00";
 -- Tabelstructuur voor tabel `documents`
 --
 
-DROP TABLE IF EXISTS `documents`;
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `doc_id` varchar(64) NOT NULL,
+  `doc_id` tinytext NOT NULL,
   `title` mediumtext,
   `contents` text,
   `category` text,
@@ -46,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `documents` (
   FULLTEXT KEY `title` (`title`,`contents`,`category`,`questions`,`answers`,`answerers`,`answerers_ministry`,`keywords`,`questioners`,`questioners_party`,`doc_id`),
   FULLTEXT KEY `questions` (`questions`),
   FULLTEXT KEY `answers` (`answers`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=40667 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

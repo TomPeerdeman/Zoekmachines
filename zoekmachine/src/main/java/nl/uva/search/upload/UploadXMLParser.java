@@ -64,6 +64,12 @@ public class UploadXMLParser extends DefaultHandler {
 		answerers_ministry = new StringBuilder();
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
+	 * java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
@@ -76,27 +82,41 @@ public class UploadXMLParser extends DefaultHandler {
 		stack.addLast(new NameAttributePair(qName, attributes));
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
+	 * java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void endElement(String uri, String localName,
 			String qName) throws SAXException {
+		// Get item from stack
 		NameAttributePair pair = stack.getLast();
 		if(pair.getName().equalsIgnoreCase(qName)) {
+			// Remove item from stack, we don't need it anymore
 			stack.removeLast();
+			
+			// Get the XML attributes
 			Map<String, String> attr = pair.getAttributes();
 			
+			// Parse <item> entries
 			if(qName.equalsIgnoreCase("item") && attr.containsKey("attribuut")) {
+				// Get the item type
 				String itemAttr = attr.get("attribuut");
 				
 				if(columnMapping.containsKey(itemAttr)) {
+					// Map xml known items to database columns
 					docDescr.put(columnMapping.get(itemAttr), text.toString());
 				} else if(itemAttr.equalsIgnoreCase("Bibliografische_omschrijving")) {
 					// Parse title
 					String titleText = text.toString();
 					
-					int start = titleText.lastIndexOf("over");
+					// Find start of block, starts with 'over' or 'inzake'
+					int start = titleText.indexOf("over");
 					start += 5;
 					if(start < 5) {
-						start = titleText.lastIndexOf("inzake");
+						start = titleText.indexOf("inzake");
 						start += 7;
 						if(start < 7) {
 							start = -1;
@@ -104,25 +124,39 @@ public class UploadXMLParser extends DefaultHandler {
 					}
 					
 					if(start > 5) {
-						int end = titleText.lastIndexOf("(");
+						// Find end of block, ends with '(Ingezonden' or just
+						// end of the text
+						int end = titleText.lastIndexOf("(Ingezonden");
 						if(end < 0 || start + 1 >= end) {
-							end = titleText.length();
+							end = titleText.lastIndexOf(";");
+							if(end < 0 || start + 1 >= end) {
+								end = titleText.length();
+							}
 						}
 						
+						// Block is valid
 						if(end > 0) {
 							String title =
 								titleText.substring(start + 1, end);
+							
 							// Add capitalized first letter
 							title =
 								titleText.substring(start, start + 1)
 											.toUpperCase()
 										+ title;
+							
+							// Trim start & ending whitespace
 							title = title.trim();
+							
+							// Remove ending dot
 							if(title.endsWith(".")) {
 								title = title.substring(0, title.length() - 1);
 							}
 							docDescr.put("title", title);
 						}
+					} else {
+						// Put full description to prevent NULL titles
+						docDescr.put("title", escape(text.toString()));
 					}
 				} else if(itemAttr.equalsIgnoreCase("Document-id")) {
 					if(numberPattern.matcher(text).matches()) {
@@ -145,12 +179,26 @@ public class UploadXMLParser extends DefaultHandler {
 				answers.append(escape(text.toString()));
 				answers.append(" ");
 			} else if(qName.equalsIgnoreCase("vrager")) {
-				questioners_party.append(escape(attr.get("partij")));
+				// Is the patrij attribute present, if not insert 'Unknown'
+				if(attr.get("partij") == null || attr.get("partij").equals("")) {
+					questioners_party.append("Unknown");
+				} else {
+					questioners_party.append(escape(attr.get("partij")));
+				}
 				questioners_party.append(", ");
 				questioners.append(escape(text.toString()));
 				questioners.append(", ");
 			} else if(qName.equalsIgnoreCase("antwoorder")) {
-				answerers_ministry.append(escape(attr.get("ministerie")));
+				// Is the ministerie attribute present, if not insert 'Unknown'
+				if(attr.get("ministerie") == null
+						|| attr.get("ministerie").equals("")) {
+					// Only insert unknown if we know the person
+					if(text.length() > 0) {
+						answerers_ministry.append("Unknown");
+					}
+				} else {
+					answerers_ministry.append(escape(attr.get("ministerie")));
+				}
 				answerers_ministry.append(", ");
 				answerers.append(escape(text.toString()));
 				answerers.append(", ");
@@ -176,6 +224,11 @@ public class UploadXMLParser extends DefaultHandler {
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
+	 */
 	@Override
 	public void characters(char ch[], int start, int length)
 			throws SAXException {
@@ -186,6 +239,7 @@ public class UploadXMLParser extends DefaultHandler {
 		String cols = "";
 		String values = "";
 		for(Entry<String, String> e : docDescr.entrySet()) {
+			// Ignore weird date's this indicates there is no answer anyway
 			if(e.getKey().equals("answering_date")
 					&& e.getValue().equals("99-99-9999")) {
 				continue;
@@ -201,6 +255,7 @@ public class UploadXMLParser extends DefaultHandler {
 			
 			Statement stm = null;
 			try {
+				// Perform the insert
 				stm = db.createStatement();
 				stm.execute("INSERT INTO documents (" + cols + ")  VALUES ("
 						+ values + ")");
@@ -220,6 +275,7 @@ public class UploadXMLParser extends DefaultHandler {
 	}
 	
 	private String escape(String val) {
+		// Remove starting & ending whitespace, remove "'" and "\" characters
 		return val.trim().replaceAll("'|\\\\", "");
 	}
 	
