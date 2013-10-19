@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -432,6 +433,7 @@ public class SearchServlet extends HttpServlet {
 			
 			String query = null;
 			String count_query = null;
+			String facet_query = null;
 			String order = "";
 			if(simple) {
 				String input = req.getParameter("query");
@@ -629,17 +631,22 @@ public class SearchServlet extends HttpServlet {
 				count_query =
 					"SELECT COUNT(*) as results FROM documents WHERE "
 							+ query_substring;
+				
+				facet_query = "SELECT questioners_party FROM documents WHERE " + query_substring;
 			}
-			
 			query += order + " LIMIT 50";
 			
 			Statement stm = null;
 			ResultSet res = null;
 			Statement stm_count = null;
 			ResultSet res_count = null;
+			Statement stm_facet = null;
+			ResultSet res_facet = null;
+			
 			try {
 				stm = conn.createStatement();
 				res = stm.executeQuery(query);
+				
 				stm_count = conn.createStatement();
 				res_count = stm_count.executeQuery(count_query);
 				res_count.next();
@@ -648,17 +655,59 @@ public class SearchServlet extends HttpServlet {
 					out.print("<center>Your search did not match any documents</center");
 					return;
 				}
-				
+
 				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+				// Timeline
 				out.print("<tr><td>Timeline:<br /><img src=\"search/chart/"
 						+ getQuery
 						+ "\"></td></tr>");
+				out.print("</table>");
+				
+				// Party Facet Table
+				if (facet_query != null) {
+					stm_facet = conn.createStatement();
+					res_facet = stm_facet.executeQuery(facet_query);
+					Map<String, Integer> hashmap = new HashMap<String, Integer>();
+					while(res_facet.next()) {
+						String string = res_facet.getString(1);
+						String[] parts = string.split(", ");
+
+						for (int i = 0; i < parts.length; i++) {
+							Integer key = hashmap.get(parts[i]);
+							if (key == null)
+								hashmap.put(parts[i], 1);
+							else
+								hashmap.put(parts[i], key + 1);
+						}
+					}
+					
+					out.print("<table width='300' align='center' style='margin: 0px auto;'>");
+					out.print("<tr><td>Party</td><td>Count</td></tr>");
+					for (Map.Entry<String, Integer> entry : hashmap.entrySet()) {
+						out.print("<tr>");
+						out.print("<td>");
+						out.print(entry.getKey());
+						out.print("</td>");
+						out.print("<td>");
+						out.print(entry.getValue());
+						out.print("</td>");
+						out.print("</tr>");
+					}
+					out.print("<tr><td><br></td></tr>");
+					out.print("</table>");
+				}
+				
+				
+				// Amount of Results
+				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
 				out.print("<tr>");
 				out.print("<td>");
 				out.print("<font size='2' color='grey'>" + res_count.getInt(1)
 						+ " results found</font>");
 				out.print("</td>");
 				out.print("</tr>");
+				
+				// Results
 				int j = 0;
 				while(res.next()) {
 					j++;
@@ -778,6 +827,24 @@ public class SearchServlet extends HttpServlet {
 				if(res_count != null) {
 					try {
 						res_count.close();
+					} catch(SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				// Close stm_count
+				if(stm_facet != null) {
+					try {
+						stm_facet.close();
+					} catch(SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				// Close res_count
+				if(res_facet != null) {
+					try {
+						res_facet.close();
 					} catch(SQLException e) {
 						e.printStackTrace();
 					}
