@@ -30,18 +30,6 @@
 	</form>
 	<div class="center" id="result"></div>
 	<script type="text/javascript">
-		function postdata() {
-			$.ajax({
-				type : 'POST',
-				url : 'search',
-				data : $('#searchform').serialize(),
-				cache : false,
-				success : function(data) {
-					$('#result').html(data);
-				}
-			});
-		}
-
 		$('#searchform').submit(function() {
 			postdata();
 			return false;

@@ -60,7 +60,7 @@ public class SearchServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		if(req.getPathInfo().startsWith("/chart")) {
+		if(req.getPathInfo() != null && req.getPathInfo().startsWith("/chart")) {
 			generateChart(req, resp);
 			return;
 		} else if(req.getParameter("adv") == null
@@ -146,19 +146,206 @@ public class SearchServlet extends HttpServlet {
 		
 		TimeSeries series = new TimeSeries("Issue count");
 		
+		// Get a map of the request parameters
+		@SuppressWarnings("unchecked")
+		Map<String, String[]> parameters = req.getParameterMap();
+		
+		boolean simple = req.getParameter("simple_query").equals("true");
+		
+		String query = null;
+		if(simple) {
+			String input = req.getParameter("query");
+			query =
+				"SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
+						+ "FROM documents "
+						+ "WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id)"
+						+ " AGAINST ('" + input
+						+ "') AND entering_date IS NOT NULL "
+						+ "GROUP BY year, month "
+						+ "ORDER BY year, month";
+		} else {
+			query =
+				"SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
+						+ "FROM documents ";
+			
+			boolean where = false;
+			if(req.getParameter("doc_id") != null
+					&& req.getParameter("doc_id").length() != 0) {
+				query +=
+					"WHERE doc_id LIKE '%" + req.getParameter("doc_id")
+							+ "%' ";
+				where = true;
+			}
+			if(req.getParameter("title") != null
+					&& req.getParameter("title").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE title LIKE '%" + req.getParameter("title")
+								+ "%' ";
+					where = true;
+				}
+				else
+					query +=
+						"AND title LIKE '%" + req.getParameter("title")
+								+ "%' ";
+			}
+			if(req.getParameter("category") != null
+					&& req.getParameter("category").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE category LIKE '%"
+								+ req.getParameter("category")
+								+ "%' ";
+					where = true;
+				}
+				else
+					query +=
+						"AND category LIKE '%"
+								+ req.getParameter("category")
+								+ "%' ";
+			}
+			if(req.getParameter("questions") != null
+					&& req.getParameter("questions").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE MATCH questions AGAINST ('%"
+								+ req.getParameter("questions") + "%') ";
+					where = true;
+				}
+				else {
+					query +=
+						"AND MATCH questions AGAINST ('%"
+								+ req.getParameter("questions")
+								+ "%') ";
+				}
+			}
+			if(req.getParameter("answers") != null
+					&& req.getParameter("answers").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE MATCH answers AGAINST ('%"
+								+ req.getParameter("answers")
+								+ "%') ";
+					where = true;
+				}
+				else
+					query +=
+						"AND MATCH answers AGAINST ('%"
+								+ req.getParameter("answers")
+								+ "%') ";
+			}
+			if(req.getParameter("answerers") != null
+					&& req.getParameter("answerers").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE answerers LIKE '%"
+								+ req.getParameter("answerers") + "%' ";
+					where = true;
+				}
+				else
+					query +=
+						"AND answerers LIKE '%"
+								+ req.getParameter("answerers")
+								+ "%' ";
+			}
+			if(req.getParameter("keywords") != null
+					&& req.getParameter("keywords").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE keywords LIKE '%"
+								+ req.getParameter("keywords")
+								+ "%' ";
+					where = true;
+				}
+				else
+					query +=
+						"AND keywords LIKE '%"
+								+ req.getParameter("keywords")
+								+ "%' ";
+			}
+			if(req.getParameter("questioners") != null
+					&& req.getParameter("questioners").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE questioners LIKE '%"
+								+ req.getParameter("questioners") + "%' ";
+					where = true;
+				}
+				else
+					query +=
+						"AND questioners LIKE '%"
+								+ req.getParameter("questioners") + "%' ";
+			}
+			if(req.getParameter("questioners_party") != null
+					&& req.getParameter("questioners_party").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE questioners_party LIKE '%"
+								+ req.getParameter("questioners_party")
+								+ "%' ";
+					where = true;
+				}
+				else
+					query +=
+						"AND questioners_party LIKE '%"
+								+ req.getParameter("questioners_party")
+								+ "%' ";
+			}
+			if(req.getParameter("answerers_ministry") != null
+					&& req.getParameter("answerers_ministry").length() != 0) {
+				if(!where) {
+					query +=
+						"WHERE answerers_ministry LIKE '%"
+								+ req.getParameter("answerers_ministry")
+								+ "%' ";
+					where = true;
+				}
+				else
+					query +=
+						"AND answerers_ministry LIKE '%"
+								+ req.getParameter("answerers_ministry")
+								+ "%' ";
+			}
+			
+			// Modify query with entering_date and answering_date
+			if(parameters.containsKey("entering_max")
+					&& parameters.containsKey("entering_min")
+					&& parameters.containsKey("answering_max")
+					&& parameters.containsKey("answering_min")) {
+				// TODO: See if parameter is actually a date
+				
+				if(!where) {
+					query += "WHERE";
+				} else {
+					query += "AND";
+				}
+				query +=
+					" entering_date BETWEEN '"
+							+ req.getParameter("entering_min")
+							+ "' AND '"
+							+ req.getParameter("entering_max") + "'"
+							+ " AND answering_date BETWEEN '"
+							+ req.getParameter("answering_min")
+							+ "' AND '"
+							+ req.getParameter("answering_max") + "' ";
+			}
+			
+			if(!where) {
+				query += "WHERE entering_date IS NOT NULL ";
+			} else {
+				query += "AND entering_date IS NOT NULL ";
+			}
+			
+			query += "GROUP BY year, month "
+					+ "ORDER BY year, month";
+		}
+		
 		Statement stm = null;
 		ResultSet res = null;
 		try {
 			stm = conn.createStatement();
-			res =
-				stm.executeQuery("SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
-						+ "FROM documents "
-						+ "WHERE entering_date IS NOT NULL "
-						+ "GROUP BY year, month "
-						+ "ORDER BY year, month");
+			res = stm.executeQuery(query);
 			while(res.next()) {
-				System.out.printf("%d-%d: %d\n", res.getInt(3), res.getInt(2),
-						res.getInt(1));
 				series.add(new Month(res.getInt(3), res.getInt(2)),
 						res.getInt(1));
 			}
@@ -457,15 +644,15 @@ public class SearchServlet extends HttpServlet {
 				res_count = stm_count.executeQuery(count_query);
 				res_count.next();
 				
-				out.println("<img src=\"search/chart/" + getQuery
-						+ "\" id=\"logo\" class=\"center\">");
-				
 				if(res_count.getInt(1) == 0) {
 					out.print("<center>Your search did not match any documents</center");
 					return;
 				}
 				
 				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+				out.print("<tr><td>Timeline:<br /><img src=\"search/chart/"
+						+ getQuery
+						+ "\"></td></tr>");
 				out.print("<tr>");
 				out.print("<td>");
 				out.print("<font size='2' color='grey'>" + res_count.getInt(1)
@@ -494,7 +681,10 @@ public class SearchServlet extends HttpServlet {
 					
 					out.print("<tr>");
 					out.print("<td>");
-					out.print("<p class='" + res.getString(2) + "' style='display: none;'>This is a paragraph.</p><button class='toggle " + res.getString(2) + "'>Details</button>");
+					out.print("<p class='"
+							+ res.getString(2)
+							+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
+							+ res.getString(2) + "'>Details</button>");
 					out.print("</td>");
 					out.print("</tr>");
 					
