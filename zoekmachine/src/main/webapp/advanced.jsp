@@ -129,7 +129,7 @@
 					$('#entering_min').val(
 							dmin.getFullYear() + '-' + (dmin.getMonth() + 1)
 									+ '-' + dmin.getDate());
-					postdata();
+					// postdata();
 				});
 
 		$('#answering').on(
@@ -143,7 +143,7 @@
 					$('#answering_min').val(
 							dmin.getFullYear() + '-' + (dmin.getMonth() + 1)
 									+ '-' + dmin.getDate());
-					postdata();
+					// postdata();
 				});
 
 		function postdata() {

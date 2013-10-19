@@ -29,10 +29,6 @@
 	</form>
 	<div class="center" id="result"></div>
 	<script type="text/javascript">
-		$('#query').keyup(function() {
-			postdata();
-		});
-
 		function postdata() {
 			$.ajax({
 				type : 'POST',

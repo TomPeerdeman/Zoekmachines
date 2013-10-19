@@ -147,22 +147,34 @@ public class SearchServlet extends HttpServlet {
 							+ input + "') ORDER BY Score DESC";
 			} else {
 				String match_against = "";
-				if (req.getParameter("questions").length() != 0 && req.getParameter("answers").length() != 0) {
-					match_against = ",(MATCH questions AGAINST ('%" + req.getParameter("questions") + "%') + MATCH answers AGAINST ('%" + req.getParameter("answers") + "%')) AS score ";
+				if(req.getParameter("questions").length() != 0
+						&& req.getParameter("answers").length() != 0) {
+					match_against =
+						",(MATCH questions AGAINST ('%"
+								+ req.getParameter("questions")
+								+ "%') + MATCH answers AGAINST ('%"
+								+ req.getParameter("answers")
+								+ "%')) AS score ";
 					order = "ORDER BY score DESC";
 				}
-				else if (req.getParameter("questions").length() != 0) {
-					match_against = ",(MATCH questions AGAINST ('%" + req.getParameter("questions") + "%')) AS score ";
+				else if(req.getParameter("questions").length() != 0) {
+					match_against =
+						",(MATCH questions AGAINST ('%"
+								+ req.getParameter("questions")
+								+ "%')) AS score ";
 					order = "ORDER BY score DESC";
 				}
-				else if (req.getParameter("answers").length() != 0) {
-					match_against = ",(MATCH answers AGAINST ('%" + req.getParameter("answers") + "%')) AS score ";
+				else if(req.getParameter("answers").length() != 0) {
+					match_against =
+						",(MATCH answers AGAINST ('%"
+								+ req.getParameter("answers")
+								+ "%')) AS score ";
 					order = "ORDER BY score DESC";
 				}
 				
 				query = "SELECT *" + match_against + "FROM documents ";
 				boolean where = false;
-
+				
 				if(req.getParameter("doc_id").length() != 0) {
 					query +=
 						"WHERE doc_id LIKE '%" + req.getParameter("doc_id")
@@ -219,7 +231,8 @@ public class SearchServlet extends HttpServlet {
 					}
 					else
 						query +=
-							"AND MATCH answers AGAINST ('%" + req.getParameter("answers")
+							"AND MATCH answers AGAINST ('%"
+									+ req.getParameter("answers")
 									+ "%') ";
 				}
 				if(req.getParameter("answerers").length() != 0) {
@@ -313,7 +326,7 @@ public class SearchServlet extends HttpServlet {
 								+ req.getParameter("answering_max") + "' ";
 				}
 			}
-			query += order;
+			query += order + " LIMIT 50";
 			
 			Statement stm = null;
 			ResultSet res = null;
