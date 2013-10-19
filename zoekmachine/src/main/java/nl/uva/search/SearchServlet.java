@@ -329,8 +329,13 @@ public class SearchServlet extends HttpServlet {
 								+ "' AND '"
 								+ req.getParameter("answering_max") + "' ";
 				}
+				String[] parts = query.split("WHERE");
+				String query_substring = parts[parts.length - 1];
+				count_query = "SELECT COUNT(*) as results FROM documents WHERE " + query_substring;
 			}
+
 			query += order + " LIMIT 50";
+			
 			
 			Statement stm = null;
 			ResultSet res = null;
@@ -441,6 +446,24 @@ public class SearchServlet extends HttpServlet {
 				if(res != null) {
 					try {
 						res.close();
+					} catch(SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				// Close stm_count
+				if(stm_count != null) {
+					try {
+						stm_count.close();
+					} catch(SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				// Close res_count
+				if(res_count != null) {
+					try {
+						res_count.close();
 					} catch(SQLException e) {
 						e.printStackTrace();
 					}
