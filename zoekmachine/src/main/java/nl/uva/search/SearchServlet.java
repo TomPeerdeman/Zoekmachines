@@ -137,6 +137,7 @@ public class SearchServlet extends HttpServlet {
 			PrintWriter out = resp.getWriter();
 			
 			String query = null;
+			String count_query = null;
 			String order = "";
 			if(simple) {
 				String input = req.getParameter("query");
@@ -145,6 +146,9 @@ public class SearchServlet extends HttpServlet {
 							+ input
 							+ "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 							+ input + "') ORDER BY Score DESC";
+				count_query = "SELECT COUNT(*) as results FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+							+ input
+							+ "')";
 			} else {
 				String match_against = "";
 				if(req.getParameter("questions").length() != 0
@@ -330,12 +334,28 @@ public class SearchServlet extends HttpServlet {
 			
 			Statement stm = null;
 			ResultSet res = null;
+			Statement stm_count = null;
+			ResultSet res_count = null;
 			try {
 				stm = conn.createStatement();
 				res = stm.executeQuery(query);
+				stm_count = conn.createStatement();
+				res_count = stm_count.executeQuery(count_query);
+				res_count.next();
+
+				
+				
+				if(res_count.getInt(1) == 0) {
+					out.print("<center>Your search did not match any documents</center");
+					return;
+				}
 				
 				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
-				//out.print("<tr><td>#</td><td>Document Id</td><td>Title</td><td>Date of Issue</td><td>Date of Response</td><td>Issuer</td><td>Issuer's Party</td><td>Score</td></tr>");
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<font size='2' color='grey'>" + res_count.getInt(1) + " results found</font>");
+				out.print("</td>");
+				out.print("</tr>");
 				int j = 0;
 				while(res.next()) {
 					j++;
