@@ -166,6 +166,22 @@
 		$('#simple_button').click(function() {
 			window.location.href = '/';
 		});
+		
+		function postdata() {
+			$.ajax({
+				type : 'POST',
+				url : 'search',
+				data : $('#searchform').serialize(),
+				cache : false,
+				success : function(data) {
+					$('#result').html(data);
+					$(".toggle").click(function() {
+						var myClasses = this.classList;
+						$("p."+myClasses[1]).toggle();
+					});
+				}
+			});
+		}
 	</script>
 	<%
 		}
