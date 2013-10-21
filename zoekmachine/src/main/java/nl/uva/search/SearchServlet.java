@@ -182,7 +182,6 @@ public class SearchServlet extends HttpServlet {
 								+ "FROM documents",
 						new String[] {"entering_date IS NOT NULL"},
 						"GROUP BY year, month ORDER BY year, month");
-			System.out.println(query + "\n");
 		}
 		
 		Statement stm = null;

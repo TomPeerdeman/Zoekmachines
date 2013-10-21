@@ -64,7 +64,7 @@ public class QueryGenerator {
 			}
 			if(db.length() > 0) {
 				db = db.substring(0, db.length() - 2);
-				where.add("MATCH (" + db + ") AGAINST('" + v + "'");
+				where.add("MATCH (" + db + ") AGAINST('%" + v + "%')");
 			}
 		}
 	}

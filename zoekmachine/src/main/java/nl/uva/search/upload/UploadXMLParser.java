@@ -11,11 +11,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import nl.uva.search.ValueComparator;
 
 /**
  * @author Ruben Janssen
@@ -24,6 +28,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class UploadXMLParser extends DefaultHandler {
 	private final Pattern numberPattern = Pattern.compile("^\\d+$");
+	private final Pattern wordPattern = Pattern.compile("([a-zA-Z]{4, })");
 	
 	private final Map<String, String> columnMapping;
 	
@@ -38,6 +43,10 @@ public class UploadXMLParser extends DefaultHandler {
 	private StringBuilder answers;
 	private StringBuilder answerers;
 	private StringBuilder answerers_ministry;
+	
+	private Map<String, Integer> docTf;
+	private Map<String, Integer> answerTf;
+	private Map<String, Integer> questionTf;
 	
 	/**
 	 * @param db
@@ -63,6 +72,10 @@ public class UploadXMLParser extends DefaultHandler {
 		answers = new StringBuilder();
 		answerers = new StringBuilder();
 		answerers_ministry = new StringBuilder();
+		
+		docTf = new HashMap<String, Integer>();
+		answerTf = new HashMap<String, Integer>();
+		questionTf = new HashMap<String, Integer>();
 	}
 	
 	/*
@@ -174,11 +187,31 @@ public class UploadXMLParser extends DefaultHandler {
 				questions.append(" ");
 				questions.append(escape(text.toString()));
 				questions.append(" ");
+				
+				Matcher m = wordPattern.matcher(text);
+				while(m.find()) {
+					String find = m.group(1);
+					if(questionTf.containsKey(find)) {
+						questionTf.put(find, questionTf.get(find) + 1);
+					} else {
+						questionTf.put(find, 1);
+					}
+				}
 			} else if(qName.equalsIgnoreCase("antwoord")) {
 				answers.append(escape(attr.get("nummer")));
 				answers.append(" ");
 				answers.append(escape(text.toString()));
 				answers.append(" ");
+				
+				Matcher m = wordPattern.matcher(text);
+				while(m.find()) {
+					String find = m.group(1);
+					if(answerTf.containsKey(find)) {
+						answerTf.put(find, answerTf.get(find) + 1);
+					} else {
+						answerTf.put(find, 1);
+					}
+				}
 			} else if(qName.equalsIgnoreCase("vrager")) {
 				// Is the patrij attribute present, if not insert 'Unknown'
 				if(attr.get("partij") == null || attr.get("partij").equals("")) {
@@ -221,8 +254,19 @@ public class UploadXMLParser extends DefaultHandler {
 								answerers_ministry.length() - 2));
 				
 				insertDocument();
+				
+				TreeMap<String, Integer> docTfTree =
+					new TreeMap<String, Integer>(new ValueComparator(docTf));
+				docTfTree.putAll(docTf);
+				// TODO: Insert?
+				
+				insertWordCloud("DOC", docTf);
 			}
 		}
+	}
+	
+	private void insertWordCloud(String type, Map<String, Integer> tf) {
+		
 	}
 	
 	/*
@@ -234,6 +278,16 @@ public class UploadXMLParser extends DefaultHandler {
 	public void characters(char ch[], int start, int length)
 			throws SAXException {
 		text.append(ch, start, length);
+		
+		Matcher m = wordPattern.matcher(new String(ch, start, length));
+		while(m.find()) {
+			String find = m.group(1);
+			if(docTf.containsKey(find)) {
+				docTf.put(find, docTf.get(find) + 1);
+			} else {
+				docTf.put(find, 1);
+			}
+		}
 	}
 	
 	private void insertDocument() throws SAXException {
