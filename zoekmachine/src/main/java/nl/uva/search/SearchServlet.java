@@ -385,7 +385,20 @@ public class SearchServlet extends HttpServlet {
 					
 					for(int i = 0; i < parts.length; i++) {
 						// TODO Adjust values to match the rest (C DA --> CDA)
-						// TODO Handle words like beiden
+						// TODO Handle words like beiden CDA
+						
+						// Very inefficient way to see if this part has already
+						// occurred.
+						boolean known = false;
+						for(int j = 0; j < i; j++) {
+							if(parts[i].equals(parts[j])) {
+								known = true;
+							}
+						}
+						
+						if(known) {
+							continue;
+						}
 						
 						Integer key = hashmap.get(parts[i]);
 						if(key == null)
