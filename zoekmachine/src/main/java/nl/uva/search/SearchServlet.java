@@ -365,10 +365,9 @@ public class SearchServlet extends HttpServlet {
 				return;
 			}
 			
-			out.print("<table width='600' align='center' style='margin: 0px auto;'>");
-			
 			// Timeline
-			out.print("<tr><td>Timeline:<br /><img src=\"search/chart/"
+			out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+			out.print("<tr><td><img src=\"search/chart/"
 					+ getQuery
 					+ "\"></td></tr>");
 			out.print("</table>");
