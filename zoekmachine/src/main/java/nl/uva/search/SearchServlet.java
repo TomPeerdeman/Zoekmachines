@@ -349,7 +349,7 @@ public class SearchServlet extends HttpServlet {
 			out.print("</table>");
 
 			// Party Facet Table
-			if (facet_query != null) {
+			if (facet_query != null && !isSimple(parameters)) {
 				stm_facet = conn.createStatement();
 				res_facet = stm_facet.executeQuery(facet_query);
 				Map<String, Integer> hashmap = new HashMap<String, Integer>();
