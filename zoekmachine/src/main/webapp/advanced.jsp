@@ -27,7 +27,7 @@
 	%>
 	<img src="elgoog.jpg" id="logo" class="center">
 
-	<form method="POST" action="#" id="searchform">
+	<form method="POST" action="#" id="searchform" name="advsearchform">
 		<input type='hidden' name='simple_query' id="simple_query"
 			value="false" /> <input type="hidden" name="entering_max"
 			id="entering_max" value="<%=emax%>" /> <input type="hidden"
@@ -169,6 +169,11 @@
 					});
 				}
 			});
+		}
+		
+		function applyPartyFilter(party) {
+			document.advsearchform.questioners_party.value = party;
+			postdata();
 		}
 	</script>
 	<%

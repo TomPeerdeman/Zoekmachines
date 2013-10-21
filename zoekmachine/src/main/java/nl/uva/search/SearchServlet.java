@@ -87,12 +87,10 @@ public class SearchServlet extends HttpServlet {
 		ResultSet res = null;
 		try {
 			stm = conn.createStatement();
-			res =
-				stm.executeQuery("SELECT MAX(entering_date) AS emax, "
-						+ "MIN(entering_date) AS emin, "
-						+ "MAX(answering_date) AS amax, "
-						+ "MIN(answering_date) AS amin "
-						+ "FROM documents");
+			res = stm.executeQuery("SELECT MAX(entering_date) AS emax, "
+					+ "MIN(entering_date) AS emin, "
+					+ "MAX(answering_date) AS amax, "
+					+ "MIN(answering_date) AS amin " + "FROM documents");
 			while(res.next()) {
 				for(int i = 0; i < res.getMetaData().getColumnCount(); i++) {
 					req.setAttribute(res.getMetaData().getColumnName(i + 1),
@@ -135,7 +133,8 @@ public class SearchServlet extends HttpServlet {
 	private boolean isSimple(Map<String, String[]> parameters) {
 		if(parameters.containsKey("simple_query")) {
 			String[] arr = parameters.get("simple_query");
-			return(arr != null && arr.length > 0 && arr[0] != null && arr[0].equals("true"));
+			return(arr != null && arr.length > 0 && arr[0] != null && arr[0]
+																			.equals("true"));
 		}
 		return false;
 	}
@@ -170,10 +169,10 @@ public class SearchServlet extends HttpServlet {
 				"SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
 						+ "FROM documents "
 						+ "WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id)"
-						+ " AGAINST ('" + input
+						+ " AGAINST ('"
+						+ input
 						+ "') AND entering_date IS NOT NULL "
-						+ "GROUP BY year, month "
-						+ "ORDER BY year, month";
+						+ "GROUP BY year, month " + "ORDER BY year, month";
 		} else {
 			QueryGenerator gen = new QueryGenerator(parameters);
 			query =
@@ -225,13 +224,12 @@ public class SearchServlet extends HttpServlet {
 		TimeSeriesCollection timeColl = new TimeSeriesCollection();
 		timeColl.addSeries(series);
 		
-		JFreeChart chart =
-			ChartFactory.createXYBarChart("", "Issue date", true,
-					"# of documents",
-					timeColl, PlotOrientation.VERTICAL, false, false, false);
+		JFreeChart chart = ChartFactory.createXYBarChart("", "Issue date",
+				true, "# of documents", timeColl, PlotOrientation.VERTICAL,
+				false, false, false);
 		
-		XYBarRenderer renderer =
-			(XYBarRenderer) chart.getXYPlot().getRenderer();
+		XYBarRenderer renderer = (XYBarRenderer) chart.getXYPlot()
+														.getRenderer();
 		renderer.setShadowVisible(false);
 		renderer.setDrawBarOutline(false);
 		renderer.setBarPainter(new StandardXYBarPainter());
@@ -284,63 +282,47 @@ public class SearchServlet extends HttpServlet {
 						+ input + "') ORDER BY Score DESC";
 			count_query =
 				"SELECT COUNT(*) as results FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
-						+ input
-						+ "')";
+						+ input + "')";
 			
 			facet_query =
 				"SELECT questioners_party, COUNT(*) FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
-						+ input
-						+ "') GROUP BY questioners_party";
+						+ input + "') GROUP BY questioners_party";
 		} else {
 			String match_against = null;
 			if(req.getParameter("questions").length() != 0
 					&& req.getParameter("answers").length() != 0) {
-				match_against =
-					",(MATCH questions AGAINST ('%"
-							+ req.getParameter("questions")
-							+ "%') + MATCH answers AGAINST ('%"
-							+ req.getParameter("answers")
-							+ "%')) AS score ";
-			}
-			else if(req.getParameter("questions").length() != 0) {
-				match_against =
-					",(MATCH questions AGAINST ('%"
-							+ req.getParameter("questions")
-							+ "%')) AS score ";
-			}
-			else if(req.getParameter("answers").length() != 0) {
-				match_against =
-					",(MATCH answers AGAINST ('%"
-							+ req.getParameter("answers")
-							+ "%')) AS score ";
+				match_against = ",(MATCH questions AGAINST ('%"
+						+ req.getParameter("questions")
+						+ "%') + MATCH answers AGAINST ('%"
+						+ req.getParameter("answers") + "%')) AS score ";
+			} else if(req.getParameter("questions").length() != 0) {
+				match_against = ",(MATCH questions AGAINST ('%"
+						+ req.getParameter("questions") + "%')) AS score ";
+			} else if(req.getParameter("answers").length() != 0) {
+				match_against = ",(MATCH answers AGAINST ('%"
+						+ req.getParameter("answers") + "%')) AS score ";
 			}
 			
 			QueryGenerator gen = new QueryGenerator(parameters);
 			
 			if(match_against != null) {
-				query =
-					gen.generate(
-							"SELECT *" + match_against + "FROM documents ",
-							null, "ORDER BY score DESC");
+				query = gen.generate("SELECT *" + match_against
+						+ "FROM documents ", null, "ORDER BY score DESC");
 			} else {
-				query =
-					gen.generate("SELECT * FROM documents ", null, null);
+				query = gen.generate("SELECT * FROM documents ", null, null);
 			}
 			
 			String[] parts = query.split("WHERE");
 			String query_substring = parts[parts.length - 1];
-			count_query =
-				"SELECT COUNT(*) as results FROM documents WHERE "
-						+ query_substring;
+			count_query = "SELECT COUNT(*) as results FROM documents WHERE "
+					+ query_substring;
 			
-			count_query =
-				gen.generate("SELECT COUNT(*) as results FROM documents",
-						null, null);
+			count_query = gen.generate(
+					"SELECT COUNT(*) as results FROM documents", null, null);
 			
-			facet_query =
-				gen.generate(
-						"SELECT questioners_party, COUNT(*) FROM documents",
-						null, "GROUP BY questioners_party");
+			facet_query = gen.generate(
+					"SELECT questioners_party, COUNT(*) FROM documents", null,
+					"GROUP BY questioners_party");
 		}
 		query += " LIMIT 50";
 		
@@ -360,14 +342,13 @@ public class SearchServlet extends HttpServlet {
 			res_count.next();
 			
 			if(res_count.getInt(1) == 0) {
-				out.print("<center>Your search did not match any documents</center");
+				out.print("<center>Your search did not match any documents. Please check your spelling and note that at least 4 characters have to be used as input.</center");
 				return;
 			}
 			
 			// Timeline
 			out.print("<table width='600' align='center' style='margin: 0px auto;'>");
-			out.print("<tr><td><img src=\"search/chart/"
-					+ getQuery
+			out.print("<tr><td><img src=\"search/chart/" + getQuery
 					+ "\"></td></tr>");
 			out.print("</table>");
 			
@@ -375,8 +356,7 @@ public class SearchServlet extends HttpServlet {
 			if(facet_query != null) {
 				stm_facet = conn.createStatement();
 				res_facet = stm_facet.executeQuery(facet_query);
-				Map<String, Integer> hashmap =
-					new HashMap<String, Integer>();
+				Map<String, Integer> hashmap = new HashMap<String, Integer>();
 				while(res_facet.next()) {
 					String string = res_facet.getString(1);
 					String[] parts = string.split(", ");
@@ -408,7 +388,8 @@ public class SearchServlet extends HttpServlet {
 				
 				// Sort the map by it's values
 				TreeMap<String, Integer> treeMap =
-					new TreeMap<String, Integer>(new ValueComparator(hashmap));
+					new TreeMap<String, Integer>(
+							new ValueComparator(hashmap));
 				treeMap.putAll(hashmap);
 				
 				out.print("<table width='300' align='center' style='margin: 0px auto;'>");
@@ -416,8 +397,11 @@ public class SearchServlet extends HttpServlet {
 				for(Map.Entry<String, Integer> entry : treeMap.entrySet()) {
 					out.print("<tr>");
 					out.print("<td>");
-					out.print(entry.getKey());
+					out.print("<a href='#' onclick='applyPartyFilter(\""
+							+ entry.getKey() + "\");'>" + entry.getKey()
+							+ "</a>");
 					out.print("</td>");
+					
 					out.print("<td>");
 					out.print(entry.getValue());
 					out.print("</td>");
@@ -441,8 +425,7 @@ public class SearchServlet extends HttpServlet {
 				out.print("<td>");
 				out.print("<a href='http://polidocs.nl/XML/KVR/"
 						+ res.getString(2) + ".xml' target='_blank'>"
-						+ res.getString(3)
-						+ "</a>");
+						+ res.getString(3) + "</a>");
 				out.print("</td>");
 				out.print("</tr>");
 				
