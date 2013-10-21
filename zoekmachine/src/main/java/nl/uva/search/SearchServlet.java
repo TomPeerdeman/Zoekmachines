@@ -324,7 +324,7 @@ public class SearchServlet extends HttpServlet {
 					"SELECT questioners_party, COUNT(*) FROM documents", null,
 					"GROUP BY questioners_party");
 		}
-		query += " LIMIT 50";
+		query += " LIMIT 10";
 		
 		Statement stm = null;
 		ResultSet res = null;
@@ -436,10 +436,10 @@ public class SearchServlet extends HttpServlet {
 				
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<font size='2'>Document: " + res.getString(2)
-						+ "<br />By: " + res.getString(10) + " ("
+				out.print("<cite><font size='2'><font color='green'>Document: " + res.getString(2)
+						+ "</font><br />By: " + res.getString(10) + " ("
 						+ res.getString(11) + ") on " + res.getString(13)
-						+ "</font>");
+						+ "</font></cite>");
 				out.print("</td>");
 				out.print("</tr>");
 				
@@ -448,7 +448,7 @@ public class SearchServlet extends HttpServlet {
 				out.print("<p class='"
 						+ res.getString(2)
 						+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
-						+ res.getString(2) + "'>Details</button>");
+						+ res.getString(2) + "'>Wordclouds</button>");
 				out.print("</td>");
 				out.print("</tr>");
 				

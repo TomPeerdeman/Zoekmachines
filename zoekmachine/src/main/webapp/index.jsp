@@ -19,12 +19,12 @@
 
 		<table class="center" id="simpletable">
 			<tr>
-				<td colspan="2"><input type='text' name='query' id="query" /></td>
+				<td colspan="2"><input type='text' name='query' id="query" style="width:400px"/></td>
 			</tr>
 			<tr>
-				<td><input type='submit' id="submit_simple" value='Search' /></td>
-				<td><input type='button' id="advanced_button"
-					value='Advanced search' /></td>
+				<td style="width:50%"><center><input type='submit' id="submit_simple" value='Elgoog Search' /></center></td>
+				<td style="width:50%"><center><input type='button' id="advanced_button"
+					value='Advanced search' /></center></td>
 			</tr>
 		</table>
 	</form>
