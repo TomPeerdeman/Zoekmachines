@@ -1,6 +1,6 @@
 /**
  * File: UploadXMLParser.java
- * Author: Tom Peerdeman
+ * 
  */
 package nl.uva.search.upload;
 
@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
+ * @author Ruben Janssen
  * @author Tom Peerdeman
  * 
  */

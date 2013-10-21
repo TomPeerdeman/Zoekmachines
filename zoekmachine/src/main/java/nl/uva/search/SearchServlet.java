@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -49,6 +50,7 @@ public class SearchServlet extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		
+		// Open the database connection pool, configured in contex.xml
 		Context c;
 		try {
 			c = new InitialContext();
@@ -66,6 +68,7 @@ public class SearchServlet extends HttpServlet {
 			return;
 		} else if(req.getParameter("adv") == null
 				|| !req.getParameter("adv").equals("true")) {
+			// Invalid path, redirect to home
 			resp.sendRedirect("/");
 			return;
 		}
@@ -79,6 +82,7 @@ public class SearchServlet extends HttpServlet {
 			throw new ServletException(e);
 		}
 		
+		// Fetch the bounds for the entering_date and answering_date slider
 		Statement stm = null;
 		ResultSet res = null;
 		try {
@@ -128,6 +132,14 @@ public class SearchServlet extends HttpServlet {
 		view.forward(req, resp);
 	}
 	
+	private boolean isSimple(Map<String, String[]> parameters) {
+		if(parameters.containsKey("simple_query")) {
+			String[] arr = parameters.get("simple_query");
+			return(arr != null && arr.length > 0 && arr[0] != null && arr[0].equals("true"));
+		}
+		return false;
+	}
+	
 	/**
 	 * @param req
 	 * @param resp
@@ -151,10 +163,8 @@ public class SearchServlet extends HttpServlet {
 		@SuppressWarnings("unchecked")
 		Map<String, String[]> parameters = req.getParameterMap();
 		
-		boolean simple = req.getParameter("simple_query").equals("true");
-		
 		String query = null;
-		if(simple) {
+		if(isSimple(parameters)) {
 			String input = req.getParameter("query");
 			query =
 				"SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
@@ -165,180 +175,14 @@ public class SearchServlet extends HttpServlet {
 						+ "GROUP BY year, month "
 						+ "ORDER BY year, month";
 		} else {
+			QueryGenerator gen = new QueryGenerator(parameters);
 			query =
-				"SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
-						+ "FROM documents ";
-			
-			boolean where = false;
-			if(req.getParameter("doc_id") != null
-					&& req.getParameter("doc_id").length() != 0) {
-				query +=
-					"WHERE doc_id LIKE '%" + req.getParameter("doc_id")
-							+ "%' ";
-				where = true;
-			}
-			if(req.getParameter("title") != null
-					&& req.getParameter("title").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE title LIKE '%" + req.getParameter("title")
-								+ "%' ";
-					where = true;
-				}
-				else
-					query +=
-						"AND title LIKE '%" + req.getParameter("title")
-								+ "%' ";
-			}
-			if(req.getParameter("category") != null
-					&& req.getParameter("category").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE category LIKE '%"
-								+ req.getParameter("category")
-								+ "%' ";
-					where = true;
-				}
-				else
-					query +=
-						"AND category LIKE '%"
-								+ req.getParameter("category")
-								+ "%' ";
-			}
-			if(req.getParameter("questions") != null
-					&& req.getParameter("questions").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE MATCH questions AGAINST ('%"
-								+ req.getParameter("questions") + "%') ";
-					where = true;
-				}
-				else {
-					query +=
-						"AND MATCH questions AGAINST ('%"
-								+ req.getParameter("questions")
-								+ "%') ";
-				}
-			}
-			if(req.getParameter("answers") != null
-					&& req.getParameter("answers").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE MATCH answers AGAINST ('%"
-								+ req.getParameter("answers")
-								+ "%') ";
-					where = true;
-				}
-				else
-					query +=
-						"AND MATCH answers AGAINST ('%"
-								+ req.getParameter("answers")
-								+ "%') ";
-			}
-			if(req.getParameter("answerers") != null
-					&& req.getParameter("answerers").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE answerers LIKE '%"
-								+ req.getParameter("answerers") + "%' ";
-					where = true;
-				}
-				else
-					query +=
-						"AND answerers LIKE '%"
-								+ req.getParameter("answerers")
-								+ "%' ";
-			}
-			if(req.getParameter("keywords") != null
-					&& req.getParameter("keywords").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE keywords LIKE '%"
-								+ req.getParameter("keywords")
-								+ "%' ";
-					where = true;
-				}
-				else
-					query +=
-						"AND keywords LIKE '%"
-								+ req.getParameter("keywords")
-								+ "%' ";
-			}
-			if(req.getParameter("questioners") != null
-					&& req.getParameter("questioners").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE questioners LIKE '%"
-								+ req.getParameter("questioners") + "%' ";
-					where = true;
-				}
-				else
-					query +=
-						"AND questioners LIKE '%"
-								+ req.getParameter("questioners") + "%' ";
-			}
-			if(req.getParameter("questioners_party") != null
-					&& req.getParameter("questioners_party").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE questioners_party LIKE '%"
-								+ req.getParameter("questioners_party")
-								+ "%' ";
-					where = true;
-				}
-				else
-					query +=
-						"AND questioners_party LIKE '%"
-								+ req.getParameter("questioners_party")
-								+ "%' ";
-			}
-			if(req.getParameter("answerers_ministry") != null
-					&& req.getParameter("answerers_ministry").length() != 0) {
-				if(!where) {
-					query +=
-						"WHERE answerers_ministry LIKE '%"
-								+ req.getParameter("answerers_ministry")
-								+ "%' ";
-					where = true;
-				}
-				else
-					query +=
-						"AND answerers_ministry LIKE '%"
-								+ req.getParameter("answerers_ministry")
-								+ "%' ";
-			}
-			
-			// Modify query with entering_date and answering_date
-			if(parameters.containsKey("entering_max")
-					&& parameters.containsKey("entering_min")
-					&& parameters.containsKey("answering_max")
-					&& parameters.containsKey("answering_min")) {
-				// TODO: See if parameter is actually a date
-				
-				if(!where) {
-					query += "WHERE";
-				} else {
-					query += "AND";
-				}
-				query +=
-					" entering_date BETWEEN '"
-							+ req.getParameter("entering_min")
-							+ "' AND '"
-							+ req.getParameter("entering_max") + "'"
-							+ " AND answering_date BETWEEN '"
-							+ req.getParameter("answering_min")
-							+ "' AND '"
-							+ req.getParameter("answering_max") + "' ";
-			}
-			
-			if(!where) {
-				query += "WHERE entering_date IS NOT NULL ";
-			} else {
-				query += "AND entering_date IS NOT NULL ";
-			}
-			
-			query += "GROUP BY year, month "
-					+ "ORDER BY year, month";
+				gen.generate(
+						"SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
+								+ "FROM documents",
+						new String[] {"entering_date IS NOT NULL"},
+						"GROUP BY year, month ORDER BY year, month");
+			System.out.println(query + "\n");
 		}
 		
 		Statement stm = null;
@@ -404,462 +248,284 @@ public class SearchServlet extends HttpServlet {
 		@SuppressWarnings("unchecked")
 		Map<String, String[]> parameters = req.getParameterMap();
 		
-		if(parameters.containsKey("simple_query")) {
-			boolean simple = req.getParameter("simple_query").equals("true");
-			
-			String getQuery = "?";
-			for(Entry<String, String[]> e : parameters.entrySet()) {
-				if(e.getValue() != null && e.getValue().length > 0
-						&& e.getValue()[0].length() > 0) {
-					getQuery += e.getKey() + "=" + e.getValue()[0] + "&";
-				}
+		// Convert POST parameters to GET parameters for timeline call
+		String getQuery = "?";
+		for(Entry<String, String[]> e : parameters.entrySet()) {
+			if(e.getValue() != null && e.getValue().length > 0
+					&& e.getValue()[0].length() > 0) {
+				getQuery += e.getKey() + "=" + e.getValue()[0] + "&";
 			}
-			if(getQuery.length() > 1) {
-				getQuery = getQuery.substring(0, getQuery.length() - 1);
+		}
+		if(getQuery.length() > 1) {
+			getQuery = getQuery.substring(0, getQuery.length() - 1);
+		}
+		
+		// Open db connection
+		Connection conn = null;
+		try {
+			conn = db.getConnection();
+		} catch(SQLException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			throw new ServletException(e);
+		}
+		
+		resp.setContentType("text/html");
+		PrintWriter out = resp.getWriter();
+		
+		String query = null;
+		String count_query = null;
+		String facet_query = null;
+		if(isSimple(parameters)) {
+			String input = req.getParameter("query");
+			query =
+				"SELECT *, MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+						+ input
+						+ "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+						+ input + "') ORDER BY Score DESC";
+			count_query =
+				"SELECT COUNT(*) as results FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+						+ input
+						+ "')";
+			
+			facet_query =
+				"SELECT questioners_party, COUNT(*) FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+						+ input
+						+ "') GROUP BY questioners_party";
+		} else {
+			String match_against = null;
+			if(req.getParameter("questions").length() != 0
+					&& req.getParameter("answers").length() != 0) {
+				match_against =
+					",(MATCH questions AGAINST ('%"
+							+ req.getParameter("questions")
+							+ "%') + MATCH answers AGAINST ('%"
+							+ req.getParameter("answers")
+							+ "%')) AS score ";
+			}
+			else if(req.getParameter("questions").length() != 0) {
+				match_against =
+					",(MATCH questions AGAINST ('%"
+							+ req.getParameter("questions")
+							+ "%')) AS score ";
+			}
+			else if(req.getParameter("answers").length() != 0) {
+				match_against =
+					",(MATCH answers AGAINST ('%"
+							+ req.getParameter("answers")
+							+ "%')) AS score ";
 			}
 			
-			// Open db connection
-			Connection conn = null;
-			try {
-				conn = db.getConnection();
-			} catch(SQLException e) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				e.printStackTrace();
-				throw new ServletException(e);
-			}
+			QueryGenerator gen = new QueryGenerator(parameters);
 			
-			resp.setContentType("text/html");
-			PrintWriter out = resp.getWriter();
-			
-			String query = null;
-			String count_query = null;
-			String facet_query = null;
-			String order = "";
-			if(simple) {
-				String input = req.getParameter("query");
+			if(match_against != null) {
 				query =
-					"SELECT *, MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
-							+ input
-							+ "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
-							+ input + "') ORDER BY Score DESC";
-				count_query =
-					"SELECT COUNT(*) as results FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
-							+ input
-							+ "')";
+					gen.generate(
+							"SELECT *" + match_against + "FROM documents ",
+							null, "ORDER BY score DESC");
 			} else {
-				String match_against = "";
-				if(req.getParameter("questions").length() != 0
-						&& req.getParameter("answers").length() != 0) {
-					match_against =
-						",(MATCH questions AGAINST ('%"
-								+ req.getParameter("questions")
-								+ "%') + MATCH answers AGAINST ('%"
-								+ req.getParameter("answers")
-								+ "%')) AS score ";
-					order = "ORDER BY score DESC";
-				}
-				else if(req.getParameter("questions").length() != 0) {
-					match_against =
-						",(MATCH questions AGAINST ('%"
-								+ req.getParameter("questions")
-								+ "%')) AS score ";
-					order = "ORDER BY score DESC";
-				}
-				else if(req.getParameter("answers").length() != 0) {
-					match_against =
-						",(MATCH answers AGAINST ('%"
-								+ req.getParameter("answers")
-								+ "%')) AS score ";
-					order = "ORDER BY score DESC";
-				}
-				
-				query = "SELECT *" + match_against + "FROM documents ";
-				boolean where = false;
-				
-				if(req.getParameter("doc_id").length() != 0) {
-					query +=
-						"WHERE doc_id LIKE '%" + req.getParameter("doc_id")
-								+ "%' ";
-					where = true;
-				}
-				if(req.getParameter("title").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE title LIKE '%" + req.getParameter("title")
-									+ "%' ";
-						where = true;
-					}
-					else
-						query +=
-							"AND title LIKE '%" + req.getParameter("title")
-									+ "%' ";
-				}
-				if(req.getParameter("category").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE category LIKE '%"
-									+ req.getParameter("category")
-									+ "%' ";
-						where = true;
-					}
-					else
-						query +=
-							"AND category LIKE '%"
-									+ req.getParameter("category")
-									+ "%' ";
-				}
-				if(req.getParameter("questions").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE MATCH questions AGAINST ('%"
-									+ req.getParameter("questions") + "%') ";
-						where = true;
-					}
-					else {
-						query +=
-							"AND MATCH questions AGAINST ('%"
-									+ req.getParameter("questions")
-									+ "%') ";
-					}
-				}
-				if(req.getParameter("answers").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE MATCH answers AGAINST ('%"
-									+ req.getParameter("answers")
-									+ "%') ";
-						where = true;
-					}
-					else
-						query +=
-							"AND MATCH answers AGAINST ('%"
-									+ req.getParameter("answers")
-									+ "%') ";
-				}
-				if(req.getParameter("answerers").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE answerers LIKE '%"
-									+ req.getParameter("answerers") + "%' ";
-						where = true;
-					}
-					else
-						query +=
-							"AND answerers LIKE '%"
-									+ req.getParameter("answerers")
-									+ "%' ";
-				}
-				if(req.getParameter("keywords").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE keywords LIKE '%"
-									+ req.getParameter("keywords")
-									+ "%' ";
-						where = true;
-					}
-					else
-						query +=
-							"AND keywords LIKE '%"
-									+ req.getParameter("keywords")
-									+ "%' ";
-				}
-				if(req.getParameter("questioners").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE questioners LIKE '%"
-									+ req.getParameter("questioners") + "%' ";
-						where = true;
-					}
-					else
-						query +=
-							"AND questioners LIKE '%"
-									+ req.getParameter("questioners") + "%' ";
-				}
-				if(req.getParameter("questioners_party").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE questioners_party LIKE '%"
-									+ req.getParameter("questioners_party")
-									+ "%' ";
-						where = true;
-					}
-					else
-						query +=
-							"AND questioners_party LIKE '%"
-									+ req.getParameter("questioners_party")
-									+ "%' ";
-				}
-				if(req.getParameter("answerers_ministry").length() != 0) {
-					if(!where) {
-						query +=
-							"WHERE answerers_ministry LIKE '%"
-									+ req.getParameter("answerers_ministry")
-									+ "%' ";
-						where = true;
-					}
-					else
-						query +=
-							"AND answerers_ministry LIKE '%"
-									+ req.getParameter("answerers_ministry")
-									+ "%' ";
-				}
-				
-				// Modify query with entering_date and answering_date
-				if(parameters.containsKey("entering_max")
-						&& parameters.containsKey("entering_min")
-						&& parameters.containsKey("answering_max")
-						&& parameters.containsKey("answering_min")) {
-					// TODO: See if parameter is actually a date
-					
-					if(!where) {
-						query += "WHERE";
-					} else {
-						query += "AND";
-					}
-					query +=
-						" entering_date BETWEEN '"
-								+ req.getParameter("entering_min")
-								+ "' AND '"
-								+ req.getParameter("entering_max") + "'"
-								+ " AND answering_date BETWEEN '"
-								+ req.getParameter("answering_min")
-								+ "' AND '"
-								+ req.getParameter("answering_max") + "' ";
-				}
-				String[] parts = query.split("WHERE");
-				String query_substring = parts[parts.length - 1];
-				count_query =
-					"SELECT COUNT(*) as results FROM documents WHERE "
-							+ query_substring;
-				
-				facet_query = "SELECT questioners_party FROM documents WHERE " + query_substring;
+				query =
+					gen.generate("SELECT * FROM documents ", null, null);
 			}
-			query += order + " LIMIT 50";
 			
-			Statement stm = null;
-			ResultSet res = null;
-			Statement stm_count = null;
-			ResultSet res_count = null;
-			Statement stm_facet = null;
-			ResultSet res_facet = null;
+			String[] parts = query.split("WHERE");
+			String query_substring = parts[parts.length - 1];
+			count_query =
+				"SELECT COUNT(*) as results FROM documents WHERE "
+						+ query_substring;
 			
-			try {
-				stm = conn.createStatement();
-				res = stm.executeQuery(query);
-				
-				stm_count = conn.createStatement();
-				res_count = stm_count.executeQuery(count_query);
-				res_count.next();
-				
-				if(res_count.getInt(1) == 0) {
-					out.print("<center>Your search did not match any documents</center");
-					return;
-				}
-
-				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
-				// Timeline
-				out.print("<tr><td>Timeline:<br /><img src=\"search/chart/"
-						+ getQuery
-						+ "\"></td></tr>");
-				out.print("</table>");
-				
-				// Party Facet Table
-				if (facet_query != null) {
-					stm_facet = conn.createStatement();
-					res_facet = stm_facet.executeQuery(facet_query);
-					Map<String, Integer> hashmap = new HashMap<String, Integer>();
-					while(res_facet.next()) {
-						String string = res_facet.getString(1);
-						String[] parts = string.split(", ");
-
-						for (int i = 0; i < parts.length; i++) {
-							Integer key = hashmap.get(parts[i]);
-							if (key == null)
-								hashmap.put(parts[i], 1);
-							else
-								hashmap.put(parts[i], key + 1);
-						}
-					}
+			count_query =
+				gen.generate("SELECT COUNT(*) as results FROM documents",
+						null, null);
+			
+			facet_query =
+				gen.generate(
+						"SELECT questioners_party, COUNT(*) FROM documents",
+						null, "GROUP BY questioners_party");
+		}
+		query += " LIMIT 50";
+		
+		Statement stm = null;
+		ResultSet res = null;
+		Statement stm_count = null;
+		ResultSet res_count = null;
+		Statement stm_facet = null;
+		ResultSet res_facet = null;
+		
+		try {
+			stm = conn.createStatement();
+			res = stm.executeQuery(query);
+			
+			stm_count = conn.createStatement();
+			res_count = stm_count.executeQuery(count_query);
+			res_count.next();
+			
+			if(res_count.getInt(1) == 0) {
+				out.print("<center>Your search did not match any documents</center");
+				return;
+			}
+			
+			out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+			
+			// Timeline
+			out.print("<tr><td>Timeline:<br /><img src=\"search/chart/"
+					+ getQuery
+					+ "\"></td></tr>");
+			out.print("</table>");
+			
+			// Party Facet Table
+			if(facet_query != null) {
+				stm_facet = conn.createStatement();
+				res_facet = stm_facet.executeQuery(facet_query);
+				Map<String, Integer> hashmap =
+					new HashMap<String, Integer>();
+				while(res_facet.next()) {
+					String string = res_facet.getString(1);
+					String[] parts = string.split(", ");
 					
-					out.print("<table width='300' align='center' style='margin: 0px auto;'>");
-					out.print("<tr><td>Party</td><td>Count</td></tr>");
-					for (Map.Entry<String, Integer> entry : hashmap.entrySet()) {
-						out.print("<tr>");
-						out.print("<td>");
-						out.print(entry.getKey());
-						out.print("</td>");
-						out.print("<td>");
-						out.print(entry.getValue());
-						out.print("</td>");
-						out.print("</tr>");
+					for(int i = 0; i < parts.length; i++) {
+						// TODO Adjust values to match the rest (C DA --> CDA)
+						// TODO Handle words like beiden
+						
+						Integer key = hashmap.get(parts[i]);
+						if(key == null)
+							hashmap.put(parts[i], res_facet.getInt(2));
+						else
+							hashmap.put(parts[i], key + res_facet.getInt(2));
 					}
-					out.print("<tr><td><br></td></tr>");
-					out.print("</table>");
 				}
 				
+				// Sort the map by it's values
+				TreeMap<String, Integer> treeMap =
+					new TreeMap<String, Integer>(new ValueComparator(hashmap));
+				treeMap.putAll(hashmap);
 				
-				// Amount of Results
-				out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+				out.print("<table width='300' align='center' style='margin: 0px auto;'>");
+				out.print("<tr><td>Party</td><td>Count</td></tr>");
+				for(Map.Entry<String, Integer> entry : treeMap.entrySet()) {
+					out.print("<tr>");
+					out.print("<td>");
+					out.print(entry.getKey());
+					out.print("</td>");
+					out.print("<td>");
+					out.print(entry.getValue());
+					out.print("</td>");
+					out.print("</tr>");
+				}
+				out.print("<tr><td><br></td></tr>");
+				out.print("</table>");
+			}
+			
+			// Amount of Results
+			out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+			out.print("<tr>");
+			out.print("<td>");
+			out.print("<font size='2' color='grey'>" + res_count.getInt(1)
+					+ " results found</font>");
+			out.print("</td>");
+			out.print("</tr>");
+			
+			while(res.next()) {
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<font size='2' color='grey'>" + res_count.getInt(1)
-						+ " results found</font>");
+				out.print("<a href='http://polidocs.nl/XML/KVR/"
+						+ res.getString(2) + ".xml' target='_blank'>"
+						+ res.getString(3)
+						+ "</a>");
 				out.print("</td>");
 				out.print("</tr>");
 				
-				// Results
-				int j = 0;
-				while(res.next()) {
-					j++;
-					out.print("<tr>");
-					out.print("<td>");
-					out.print("<a href='http://polidocs.nl/XML/KVR/"
-							+ res.getString(2) + ".xml' target='_blank'>"
-							+ res.getString(3)
-							+ "</a>");
-					out.print("</td>");
-					out.print("</tr>");
-					
-					out.print("<tr>");
-					out.print("<td>");
-					out.print("<font size='2'>Document: " + res.getString(2)
-							+ "<br />By: " + res.getString(10) + " ("
-							+ res.getString(11) + ") on " + res.getString(13)
-							+ "</font>");
-					out.print("</td>");
-					out.print("</tr>");
-					
-					out.print("<tr>");
-					out.print("<td>");
-					out.print("<p class='"
-							+ res.getString(2)
-							+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
-							+ res.getString(2) + "'>Details</button>");
-					out.print("</td>");
-					out.print("</tr>");
-					
-					out.print("<tr>");
-					out.print("<td>");
-					out.print("<br>");
-					out.print("</td>");
-					out.print("</tr>");
-					/*
-					 * out.print("<tr>");
-					 * 
-					 * out.print("<td>");
-					 * out.print(j);
-					 * out.print("</td>");
-					 * 
-					 * // Doc ID
-					 * out.print("<td>");
-					 * out.print(res.getString(2));
-					 * out.print("</td>");
-					 * 
-					 * // Title
-					 * out.print("<td>");
-					 * out.print(res.getString(3));
-					 * out.print("</td>");
-					 * 
-					 * // Date of issue
-					 * out.print("<td>");
-					 * out.print(res.getString(13));
-					 * out.print("</td>");
-					 * 
-					 * // Date of response
-					 * out.print("<td>");
-					 * out.print(res.getString(14));
-					 * out.print("</td>");
-					 * 
-					 * // Issuer
-					 * out.print("<td>");
-					 * out.print(res.getString(10));
-					 * out.print("</td>");
-					 * 
-					 * // Issuerś Party
-					 * out.print("<td>");
-					 * out.print(res.getString(11));
-					 * out.print("</td>");
-					 * 
-					 * // Score
-					 * if(res.getMetaData().getColumnCount() >= 15) {
-					 * out.print("<td>");
-					 * out.print(res.getString(15));
-					 * out.print("</td>");
-					 * } else {
-					 * out.print("<td>0</td>");
-					 * }
-					 * 
-					 * out.print("</tr>");
-					 */
-				}
-				out.print("</table>");
-			} catch(SQLException e1) {
-				e1.printStackTrace();
-				throw new ServletException(e1);
-			} finally {
-				// Close statement
-				if(stm != null) {
-					try {
-						stm.close();
-					} catch(SQLException e) {
-						e.printStackTrace();
-					}
-				}
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<font size='2'>Document: " + res.getString(2)
+						+ "<br />By: " + res.getString(10) + " ("
+						+ res.getString(11) + ") on " + res.getString(13)
+						+ "</font>");
+				out.print("</td>");
+				out.print("</tr>");
 				
-				// Close result
-				if(res != null) {
-					try {
-						res.close();
-					} catch(SQLException e) {
-						e.printStackTrace();
-					}
-				}
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<p class='"
+						+ res.getString(2)
+						+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
+						+ res.getString(2) + "'>Details</button>");
+				out.print("</td>");
+				out.print("</tr>");
 				
-				// Close stm_count
-				if(stm_count != null) {
-					try {
-						stm_count.close();
-					} catch(SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				
-				// Close res_count
-				if(res_count != null) {
-					try {
-						res_count.close();
-					} catch(SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				
-				// Close stm_count
-				if(stm_facet != null) {
-					try {
-						stm_facet.close();
-					} catch(SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				
-				// Close res_count
-				if(res_facet != null) {
-					try {
-						res_facet.close();
-					} catch(SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<br>");
+				out.print("</td>");
+				out.print("</tr>");
+			}
+			out.print("</table>");
+		} catch(SQLException e1) {
+			e1.printStackTrace();
+			throw new ServletException(e1);
+		} finally {
+			// Close statement
+			if(stm != null) {
 				try {
-					// Close db connection
-					conn.close();
+					stm.close();
 				} catch(SQLException e) {
 					e.printStackTrace();
 				}
 			}
 			
-			out.flush();
+			// Close result
+			if(res != null) {
+				try {
+					res.close();
+				} catch(SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			// Close stm_count
+			if(stm_count != null) {
+				try {
+					stm_count.close();
+				} catch(SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			// Close res_count
+			if(res_count != null) {
+				try {
+					res_count.close();
+				} catch(SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			// Close stm_count
+			if(stm_facet != null) {
+				try {
+					stm_facet.close();
+				} catch(SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			// Close res_count
+			if(res_facet != null) {
+				try {
+					res_facet.close();
+				} catch(SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			try {
+				// Close db connection
+				conn.close();
+			} catch(SQLException e) {
+				e.printStackTrace();
+			}
 		}
+		
+		out.flush();
 	}
 }

@@ -1,6 +1,6 @@
 /**
  * File: UploadServlet.java
- * Author: Tom Peerdeman
+ * 
  */
 package nl.uva.search.upload;
 
@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.xml.sax.SAXException;
 
 /**
+ * @author Ruben Janssen
  * @author Tom Peerdeman
  * 
  */
@@ -40,12 +41,14 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		// Allow this servlet to receive uploaded files
 		File tmp = (File) config.getServletContext()
 								.getAttribute("javax.servlet.context.tempdir");
 		DiskFileItemFactory fac = new DiskFileItemFactory();
 		fac.setRepository(tmp);
 		upload = new ServletFileUpload(fac);
 		
+		// Open the database connection pool, configured in contex.xml
 		Context c;
 		try {
 			c = new InitialContext();
@@ -67,12 +70,16 @@ public class UploadServlet extends HttpServlet {
 		try {
 			conn = db.getConnection();
 			
+			// Get the list of uploaded files
 			List<FileItem> files = upload.parseRequest(req);
+			
+			// Create a new XML parser
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			SAXParser saxParser = factory.newSAXParser();
 			for(FileItem file : files) {
 				if(!file.isFormField()) {
 					try {
+						// Parse the uploaded XML file
 						saxParser.parse(file.getInputStream(),
 								new UploadXMLParser(conn));
 					} catch(SAXException e) {
