@@ -324,7 +324,7 @@ public class SearchServlet extends HttpServlet {
 					"SELECT questioners_party, COUNT(*) FROM documents", null,
 					"GROUP BY questioners_party");
 		}
-		query += " LIMIT 50";
+		query += " LIMIT 10";
 		
 		Statement stm = null;
 		ResultSet res = null;
@@ -341,8 +341,13 @@ public class SearchServlet extends HttpServlet {
 			res_count = stm_count.executeQuery(count_query);
 			res_count.next();
 			
-			if(res_count.getInt(1) == 0) {
-				out.print("<center>Your search did not match any documents. Please check your spelling and note that at least 4 characters have to be used as input.</center");
+			if(res_count.getInt(1) == 0 && isSimple(parameters)) {
+				out.print("<center>Your search did not match any documents. <br>Please check your spelling and note that at least 4 characters have to be used as input.</center");
+				return;
+			}
+			
+			if(res_count.getInt(1) == 0 && !isSimple(parameters)) {
+				out.print("<center>Your search did not match any documents. <br>Please check your spelling and note that at least 4 characters are required for the questions and answers input.</center");
 				return;
 			}
 			
@@ -353,7 +358,7 @@ public class SearchServlet extends HttpServlet {
 			out.print("</table>");
 			
 			// Party Facet Table
-			if(facet_query != null) {
+			if (facet_query != null && !isSimple(parameters)) {
 				stm_facet = conn.createStatement();
 				res_facet = stm_facet.executeQuery(facet_query);
 				Map<String, Integer> hashmap = new HashMap<String, Integer>();
@@ -431,10 +436,10 @@ public class SearchServlet extends HttpServlet {
 				
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<font size='2'>Document: " + res.getString(2)
-						+ "<br />By: " + res.getString(10) + " ("
+				out.print("<cite><font size='2'><font color='green'>Document: " + res.getString(2)
+						+ "</font><br />By: " + res.getString(10) + " ("
 						+ res.getString(11) + ") on " + res.getString(13)
-						+ "</font>");
+						+ "</font></cite>");
 				out.print("</td>");
 				out.print("</tr>");
 				
@@ -443,7 +448,7 @@ public class SearchServlet extends HttpServlet {
 				out.print("<p class='"
 						+ res.getString(2)
 						+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
-						+ res.getString(2) + "'>Details</button>");
+						+ res.getString(2) + "'>Wordclouds</button>");
 				out.print("</td>");
 				out.print("</tr>");
 				
