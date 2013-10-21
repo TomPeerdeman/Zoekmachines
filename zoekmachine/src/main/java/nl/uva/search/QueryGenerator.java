@@ -30,7 +30,8 @@ public class QueryGenerator {
 		addWhereLike("answerers", "answerers");
 		addWhereLike("keywords", "keywords");
 		addWhereLike("questioners", "questioners");
-		addWhereLike("questioners_party", "questioners_party");
+		addWhereRLike("questioners_party", "questioners_party",
+				"^(.+, )?%VAL%(, .+)?$");
 		addWhereLike("answerers_ministry", "answerers_ministry");
 		addWhereMatch(new String[] {"questions"}, "questions");
 		addWhereMatch(new String[] {"answers"}, "answers");
@@ -44,6 +45,13 @@ public class QueryGenerator {
 		String v = getParameter(param);
 		if(v != null && v.length() > 0) {
 			where.add(db + " LIKE '%" + v + "%'");
+		}
+	}
+	
+	private void addWhereRLike(String db, String param, String regex) {
+		String v = getParameter(param);
+		if(v != null && v.length() > 0) {
+			where.add(db + " RLIKE '" + regex.replaceAll("%VAL%", v) + "'");
 		}
 	}
 	
