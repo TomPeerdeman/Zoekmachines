@@ -341,8 +341,13 @@ public class SearchServlet extends HttpServlet {
 			res_count = stm_count.executeQuery(count_query);
 			res_count.next();
 			
-			if(res_count.getInt(1) == 0) {
-				out.print("<center>Your search did not match any documents. Please check your spelling and note that at least 4 characters have to be used as input.</center");
+			if(res_count.getInt(1) == 0 && isSimple(parameters)) {
+				out.print("<center>Your search did not match any documents. <br>Please check your spelling and note that at least 4 characters have to be used as input.</center");
+				return;
+			}
+			
+			if(res_count.getInt(1) == 0 && !isSimple(parameters)) {
+				out.print("<center>Your search did not match any documents. <br>Please check your spelling and note that at least 4 characters are required for the questions and answers input.</center");
 				return;
 			}
 			
