@@ -37,6 +37,7 @@ public class UploadServlet extends HttpServlet {
 	
 	private ServletFileUpload upload;
 	private DataSource db;
+	private StopWordList stopWordList;
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -55,6 +56,12 @@ public class UploadServlet extends HttpServlet {
 			db = (DataSource) c.lookup("java:comp/env/jdbc/database");
 		} catch(NamingException e) {
 			e.printStackTrace();
+		}
+		
+		try {
+			stopWordList = new StopWordList(config.getServletContext());
+		} catch(IOException e) {
+			throw new ServletException(e);
 		}
 	}
 	
@@ -81,7 +88,7 @@ public class UploadServlet extends HttpServlet {
 					try {
 						// Parse the uploaded XML file
 						saxParser.parse(file.getInputStream(),
-								new UploadXMLParser(conn));
+								new UploadXMLParser(conn, stopWordList));
 					} catch(SAXException e) {
 						throw new ServletException(e);
 					}

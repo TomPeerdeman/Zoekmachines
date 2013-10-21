@@ -5,6 +5,7 @@
 package nl.uva.search.upload;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -27,13 +28,18 @@ import nl.uva.search.ValueComparator;
  * 
  */
 public class UploadXMLParser extends DefaultHandler {
+	private final static int NUM_WORDCLOUD_WORDS = 20;
+	
 	private final Pattern numberPattern = Pattern.compile("^\\d+$");
-	private final Pattern wordPattern = Pattern.compile("([a-zA-Z]{4, })");
+	private final Pattern wordPattern =
+		Pattern.compile("([A-Za-z\\u00C0-\\u017E]{2,})");
 	
 	private final Map<String, String> columnMapping;
 	
-	private LinkedList<NameAttributePair> stack;
 	private Connection db;
+	private StopWordList stopWordList;
+	
+	private LinkedList<NameAttributePair> stack;
 	private Map<String, String> docDescr;
 	private StringBuilder text;
 	
@@ -48,11 +54,14 @@ public class UploadXMLParser extends DefaultHandler {
 	private Map<String, Integer> answerTf;
 	private Map<String, Integer> questionTf;
 	
+	private int docId;
+	
 	/**
 	 * @param db
 	 */
-	public UploadXMLParser(Connection db) {
+	public UploadXMLParser(Connection db, StopWordList stopWordList) {
 		this.db = db;
+		this.stopWordList = stopWordList;
 		
 		stack = new LinkedList<NameAttributePair>();
 		text = new StringBuilder();
@@ -191,6 +200,7 @@ public class UploadXMLParser extends DefaultHandler {
 				Matcher m = wordPattern.matcher(text);
 				while(m.find()) {
 					String find = m.group(1);
+					find = find.toLowerCase();
 					if(questionTf.containsKey(find)) {
 						questionTf.put(find, questionTf.get(find) + 1);
 					} else {
@@ -206,6 +216,7 @@ public class UploadXMLParser extends DefaultHandler {
 				Matcher m = wordPattern.matcher(text);
 				while(m.find()) {
 					String find = m.group(1);
+					find = find.toLowerCase();
 					if(answerTf.containsKey(find)) {
 						answerTf.put(find, answerTf.get(find) + 1);
 					} else {
@@ -255,17 +266,55 @@ public class UploadXMLParser extends DefaultHandler {
 				
 				insertDocument();
 				
-				TreeMap<String, Integer> docTfTree =
-					new TreeMap<String, Integer>(new ValueComparator(docTf));
-				docTfTree.putAll(docTf);
-				// TODO: Insert?
-				
 				insertWordCloud("DOC", docTf);
+				insertWordCloud("ANSWER", answerTf);
+				insertWordCloud("QUESTION", questionTf);
 			}
 		}
 	}
 	
-	private void insertWordCloud(String type, Map<String, Integer> tf) {
+	private void insertWordCloud(String type, Map<String, Integer> tf)
+			throws SAXException {
+		
+		TreeMap<String, Integer> treeMap =
+			new TreeMap<String, Integer>(new ValueComparator(tf));
+		treeMap.putAll(tf);
+		
+		StringBuilder b = new StringBuilder();
+		int n = 0;
+		for(Entry<String, Integer> e : treeMap.entrySet()) {
+			if(n >= NUM_WORDCLOUD_WORDS) {
+				break;
+			}
+			
+			if(!stopWordList.inList(e.getKey())) {
+				b.append(e.getValue());
+				b.append(":");
+				b.append(e.getKey());
+				b.append(", ");
+				n++;
+			}
+		}
+		
+		Statement stm = null;
+		try {
+			// Perform the insert
+			stm = db.createStatement();
+			stm.execute("INSERT INTO wordclouds (doc_id, type, data)  VALUES ("
+					+ docId + ", '" + type + "', '" + b.toString() + "')");
+		} catch(SQLException e) {
+			throw new SAXException("Query: "
+					+ "INSERT INTO wordclouds (doc_id, type, data)  VALUES ("
+					+ docId + ", '" + type + "', '" + b.toString() + "')"
+					+ "\nError: " + e);
+		} finally {
+			if(stm != null) {
+				try {
+					stm.close();
+				} catch(SQLException e) {
+				}
+			}
+		}
 		
 	}
 	
@@ -282,6 +331,7 @@ public class UploadXMLParser extends DefaultHandler {
 		Matcher m = wordPattern.matcher(new String(ch, start, length));
 		while(m.find()) {
 			String find = m.group(1);
+			find = find.toLowerCase();
 			if(docTf.containsKey(find)) {
 				docTf.put(find, docTf.get(find) + 1);
 			} else {
@@ -309,16 +359,28 @@ public class UploadXMLParser extends DefaultHandler {
 			values = values.substring(0, values.length() - 2);
 			
 			Statement stm = null;
+			ResultSet res = null;
 			try {
 				// Perform the insert
 				stm = db.createStatement();
 				stm.execute("INSERT INTO documents (" + cols + ")  VALUES ("
-						+ values + ")");
+						+ values + ")", Statement.RETURN_GENERATED_KEYS);
+				res = stm.getGeneratedKeys();
+				if(res.next()) {
+					docId = res.getInt(1);
+				}
 			} catch(SQLException e) {
 				throw new SAXException("Query: " + "INSERT INTO documents ("
 						+ cols + ")  VALUES ("
 						+ values + ")\nError: " + e);
 			} finally {
+				if(res != null) {
+					try {
+						res.close();
+					} catch(SQLException e) {
+					}
+				}
+				
 				if(stm != null) {
 					try {
 						stm.close();

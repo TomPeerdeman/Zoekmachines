@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: localhost
--- Genereertijd: 19 okt 2013 om 23:40
+-- Genereertijd: 21 okt 2013 om 23:17
 -- Serverversie: 5.5.32-0ubuntu0.13.04.1
 -- PHP-versie: 5.4.9-4ubuntu2.3
 
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Databank: `zoek_db`
+-- Databank: `zoek_db2`
 --
 
 -- --------------------------------------------------------
@@ -26,6 +26,7 @@ SET time_zone = "+00:00";
 -- Tabelstructuur voor tabel `documents`
 --
 
+DROP TABLE IF EXISTS `documents`;
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `doc_id` tinytext NOT NULL,
@@ -46,6 +47,20 @@ CREATE TABLE IF NOT EXISTS `documents` (
   FULLTEXT KEY `questions` (`questions`),
   FULLTEXT KEY `answers` (`answers`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `wordclouds`
+--
+
+DROP TABLE IF EXISTS `wordclouds`;
+CREATE TABLE IF NOT EXISTS `wordclouds` (
+  `doc_id` int(10) unsigned NOT NULL,
+  `type` enum('DOC','ANSWER','QUESTION') NOT NULL,
+  `data` text NOT NULL,
+  PRIMARY KEY (`doc_id`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
