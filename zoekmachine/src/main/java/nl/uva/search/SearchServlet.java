@@ -144,6 +144,22 @@ public class SearchServlet extends HttpServlet {
 	 */
 	private void generateWordCloud(HttpServletRequest req,
 			HttpServletResponse resp) throws IOException, ServletException {
+		String doc = req.getParameter("d");
+		
+		if(doc == null) {
+			resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
+			return;
+		}
+		
+		int docId = Integer.parseInt(doc);
+		if(docId < 1) {
+			resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
+			return;
+		}
+		
+		resp.setContentType("text/html");
+		PrintWriter out = resp.getWriter();
+		
 		Connection conn = null;
 		try {
 			conn = db.getConnection();
@@ -153,8 +169,23 @@ public class SearchServlet extends HttpServlet {
 			throw new ServletException(e);
 		}
 		
+		out.print("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n" +
+				"    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">" +
+				"<html xmlns=\"http://www.w3.org/1999/xhtml\">" +
+				"<head>" +
+				"<meta charset=\"utf-8\" />" +
+				"<title>Elgoog KVR doc " + docId + "  wordcloud</title>"
+				+ "</head>" +
+				"<body>");
+		
 		try {
-			new WordcloudGenerator(conn, req, resp);
+			out.print("<em><strong>Document wordcloud</strong></em>");
+			new WordcloudGenerator(conn, "DOC", docId, out);
+			out.print("<br /><br /><em><strong>Questions wordcloud</strong></em>");
+			new WordcloudGenerator(conn, "QUESTION", docId, out);
+			out.print("<br /><br /><em><strong>Answers wordcloud</strong></em>");
+			new WordcloudGenerator(conn, "ANSWER", docId, out);
+			out.print("</body></html>");
 		} catch(Exception e1) {
 			throw new ServletException(e1);
 		} finally {
@@ -440,8 +471,9 @@ public class SearchServlet extends HttpServlet {
 				
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<a href='http://tompeerdeman.co.vu:9090/search/wordcloud?t=DOC&d="
-						+ res.getInt(1) + "' target='_blank' class='wordcloud'>"
+				out.print("<a href='/search/wordcloud?&d="
+						+ res.getInt(1)
+						+ "' target='_blank' class='wordcloud'>"
 						+ "<font size='2'>Word Cloud</font></a></a>");
 				out.print("</td>");
 				out.print("</tr>");

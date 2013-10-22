@@ -18,8 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Tom Peerdeman
@@ -29,36 +27,17 @@ public class WordcloudGenerator {
 	private static final Pattern patternComma = Pattern.compile(", ");
 	private static final Pattern patternColon = Pattern.compile("(\\d+):(.+)");
 	
-	private PrintWriter out;
-	
 	/**
 	 * @param conn
-	 * @param req
-	 * @param resp
+	 * @param type
+	 * @param docId
+	 * @param out
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	public WordcloudGenerator(Connection conn,
-			HttpServletRequest req, HttpServletResponse resp)
+	public WordcloudGenerator(Connection conn, String type, int docId,
+			PrintWriter out)
 			throws IOException, ServletException {
-		
-		String type = req.getParameter("t");
-		String docId = req.getParameter("d");
-		
-		if(type == null) {
-			type = "";
-		}
-		
-		type = type.toUpperCase();
-		
-		if(docId == null
-				|| (!type.equals("DOC") && !type.equals("ANSWER") && !type.equals("QUESTION"))) {
-			resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
-			return;
-		}
-		
-		resp.setContentType("text/html");
-		out = resp.getWriter();
 		
 		Statement stm = null;
 		ResultSet res = null;
@@ -108,8 +87,6 @@ public class WordcloudGenerator {
 					out.print("</span> ");
 				}
 				out.print("</div>");
-			} else {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
 		} catch(SQLException e1) {
 			e1.printStackTrace();

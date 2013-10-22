@@ -9,7 +9,7 @@ body {
 
 #result {
 	text-align: left;
-    width:1000px;
+	width: 1000px;
 }
 
 #logo {
@@ -23,17 +23,21 @@ body {
 }
 
 #main {
-    float:left;
-    width:500px;
+	float: left;
+	width: 500px;
 }
 
 #sidebar {
-    float:right;
-    width:500px;
+	float: right;
+	width: 500px;
 }
 
-.wordcloud {
-	text-decoration: none !important;
+a.wordcloud {
+	text-decoration: none;
+}
+
+a.wordcloud:hover {
+	text-decoration: underline;
 }
 
 a.paging {
