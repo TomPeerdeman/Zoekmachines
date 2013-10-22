@@ -381,10 +381,7 @@ public class SearchServlet extends HttpServlet {
 				
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<p class='"
-						+ res.getString(2)
-						+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
-						+ res.getString(2) + "'>Wordclouds</button>");
+				out.print("<a href='#' class='wordcloud'><font size='2'>Word Cloud</font></a>");
 				out.print("</td>");
 				out.print("</tr>");
 				

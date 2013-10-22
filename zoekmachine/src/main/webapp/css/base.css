@@ -29,3 +29,7 @@ body {
 #sidebar {
     float:right;
 }
+
+.wordcloud {
+    text-decoration: none !important;
+}
