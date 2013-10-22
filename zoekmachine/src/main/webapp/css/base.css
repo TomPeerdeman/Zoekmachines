@@ -20,3 +20,12 @@ body {
 #advtable {
 	border: solid 1 px black;
 }
+
+#results {
+    float:left;
+    padding-left:300px;
+}
+
+#sidebar {
+    float:right;
+}

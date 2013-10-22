@@ -351,8 +351,55 @@ public class SearchServlet extends HttpServlet {
 				return;
 			}
 			
+			out.print("<div id='results'>");
+			// Amount of Results
+			out.print("<table width='450'>");
+			out.print("<tr>");
+			out.print("<td>");
+			out.print("<font size='2' color='grey'>" + res_count.getInt(1)
+					+ " results found</font>");
+			out.print("</td>");
+			out.print("</tr>");
+			
+			while(res.next()) {
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<a href='http://polidocs.nl/XML/KVR/"
+						+ res.getString(2) + ".xml' target='_blank'>"
+						+ res.getString(3) + "</a>");
+				out.print("</td>");
+				out.print("</tr>");
+				
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<cite><font size='2'><font color='green'>Document: " + res.getString(2)
+						+ "</font><br />By: " + res.getString(10) + " ("
+						+ res.getString(11) + ") on " + res.getString(13)
+						+ "</font></cite>");
+				out.print("</td>");
+				out.print("</tr>");
+				
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<p class='"
+						+ res.getString(2)
+						+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
+						+ res.getString(2) + "'>Wordclouds</button>");
+				out.print("</td>");
+				out.print("</tr>");
+				
+				out.print("<tr>");
+				out.print("<td>");
+				out.print("<br>");
+				out.print("</td>");
+				out.print("</tr>");
+			}
+			out.print("</table>");
+			out.print("</div>");
+			
+			out.print("<div id='sidebar'>");
 			// Timeline
-			out.print("<table width='600' align='center' style='margin: 0px auto;'>");
+			out.print("<table width='400'>");
 			out.print("<tr><td><img src=\"search/chart/" + getQuery
 					+ "\"></td></tr>");
 			out.print("</table>");
@@ -397,7 +444,8 @@ public class SearchServlet extends HttpServlet {
 							new ValueComparator(hashmap));
 				treeMap.putAll(hashmap);
 				
-				out.print("<table width='300' align='center' style='margin: 0px auto;'>");
+				out.print("<br><table width='300' align='center'>");
+				out.print("<center><font size='4'>Party Facets: click to filter</font></center>");
 				out.print("<tr><td>Party</td><td>Count</td></tr>");
 				for(Map.Entry<String, Integer> entry : treeMap.entrySet()) {
 					out.print("<tr>");
@@ -415,50 +463,7 @@ public class SearchServlet extends HttpServlet {
 				out.print("<tr><td><br></td></tr>");
 				out.print("</table>");
 			}
-			
-			// Amount of Results
-			out.print("<table width='600' align='center' style='margin: 0px auto;'>");
-			out.print("<tr>");
-			out.print("<td>");
-			out.print("<font size='2' color='grey'>" + res_count.getInt(1)
-					+ " results found</font>");
-			out.print("</td>");
-			out.print("</tr>");
-			
-			while(res.next()) {
-				out.print("<tr>");
-				out.print("<td>");
-				out.print("<a href='http://polidocs.nl/XML/KVR/"
-						+ res.getString(2) + ".xml' target='_blank'>"
-						+ res.getString(3) + "</a>");
-				out.print("</td>");
-				out.print("</tr>");
-				
-				out.print("<tr>");
-				out.print("<td>");
-				out.print("<cite><font size='2'><font color='green'>Document: " + res.getString(2)
-						+ "</font><br />By: " + res.getString(10) + " ("
-						+ res.getString(11) + ") on " + res.getString(13)
-						+ "</font></cite>");
-				out.print("</td>");
-				out.print("</tr>");
-				
-				out.print("<tr>");
-				out.print("<td>");
-				out.print("<p class='"
-						+ res.getString(2)
-						+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
-						+ res.getString(2) + "'>Wordclouds</button>");
-				out.print("</td>");
-				out.print("</tr>");
-				
-				out.print("<tr>");
-				out.print("<td>");
-				out.print("<br>");
-				out.print("</td>");
-				out.print("</tr>");
-			}
-			out.print("</table>");
+			out.print("</div>");
 		} catch(SQLException e1) {
 			e1.printStackTrace();
 			throw new ServletException(e1);
