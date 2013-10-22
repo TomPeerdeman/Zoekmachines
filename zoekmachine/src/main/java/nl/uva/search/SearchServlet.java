@@ -356,16 +356,20 @@ public class SearchServlet extends HttpServlet {
 						+ input + "') GROUP BY questioners_party";
 		} else {
 			String match_against = null;
-			if(req.getParameter("questions").length() != 0
+			if(req.getParameter("questions") != null
+					&& req.getParameter("answers") != null
+					&& req.getParameter("questions").length() != 0
 					&& req.getParameter("answers").length() != 0) {
 				match_against = ",(MATCH questions AGAINST ('%"
 						+ req.getParameter("questions")
 						+ "%') + MATCH answers AGAINST ('%"
 						+ req.getParameter("answers") + "%')) AS score ";
-			} else if(req.getParameter("questions").length() != 0) {
+			} else if(req.getParameter("questions") != null
+					&& req.getParameter("questions").length() != 0) {
 				match_against = ",(MATCH questions AGAINST ('%"
 						+ req.getParameter("questions") + "%')) AS score ";
-			} else if(req.getParameter("answers").length() != 0) {
+			} else if(req.getParameter("answers") != null
+					&& req.getParameter("answers").length() != 0) {
 				match_against = ",(MATCH answers AGAINST ('%"
 						+ req.getParameter("answers") + "%')) AS score ";
 			}
@@ -378,11 +382,6 @@ public class SearchServlet extends HttpServlet {
 			} else {
 				query = gen.generate("SELECT * FROM documents ", null, null);
 			}
-			
-			String[] parts = query.split("WHERE");
-			String query_substring = parts[parts.length - 1];
-			count_query = "SELECT COUNT(*) as results FROM documents WHERE "
-					+ query_substring;
 			
 			count_query = gen.generate(
 					"SELECT COUNT(*) as results FROM documents", null, null);
@@ -522,7 +521,6 @@ public class SearchServlet extends HttpServlet {
 					String[] parts = string.split(", ");
 					
 					for(int i = 0; i < parts.length; i++) {
-						// TODO Adjust values to match the rest (C DA --> CDA)
 						// TODO Handle words like beiden CDA
 						
 						// Very inefficient way to see if this part has already

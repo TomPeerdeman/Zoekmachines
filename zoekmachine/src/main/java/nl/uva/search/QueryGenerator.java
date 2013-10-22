@@ -37,8 +37,18 @@ public class QueryGenerator {
 		addWhereMatch(new String[] {"answers"}, "answers");
 		addWhereBetween("entering_date", new String[] {"entering_min",
 														"entering_max"}, false);
-		addWhereBetween("answering_date", new String[] {"answering_min",
-														"answering_max"}, true);
+		String answered = getParameter("answered");
+		if(answered == null || !answered.equals("n")) {
+			addWhereBetween("answering_date", new String[] {"answering_min",
+															"answering_max"},
+					true);
+			if(answered != null && answered.equals("y")) {
+				where.add("NOT answers=''");
+				where.add("answers IS NOT NULL");
+			}
+		} else {
+			where.add("(answers='' OR answers IS NULL)");
+		}
 	}
 	
 	private void addWhereLike(String db, String param) {

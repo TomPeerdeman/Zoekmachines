@@ -39,40 +39,60 @@
 			<tr>
 				<td>Doc ID:</td>
 				<td><input type='text' name='doc_id' /></td>
-				<td rowspan="6">&nbsp;</td>
-				<td>Questions:</td>
-				<td><input type='text' name='questions' /></td>
+				<td rowspan="7">&nbsp;</td>
+				
+				<td>Keywords:</td>
+				<td><input type='text' name='keywords' /></td>
+
 			</tr>
 			<tr>
 				<td>Title :</td>
 				<td><input type='text' name='title' /></td>
-				<td>Questioner(s):</td>
-				<td><input type='text' name='questioners' /></td>
+				
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>				
 			</tr>
 			<tr>
 				<td>Category:</td>
 				<td><input type='text' name='category' /></td>
-				<td>Questioners party:</td>
-				<td><input type='text' name='questioners_party' /></td>
+				
+				<td>Answered:</td>
+				<td><input type="radio" name="answered" value="y" />Yes&nbsp;&nbsp;
+				<input type="radio" name="answered" value="n" />No&nbsp;&nbsp;
+				<input type="radio" name="answered" value="yn" checked/>Show both</td>
 			</tr>
 			<tr>
-				<td>Answers:</td>
-				<td><input type='text' name='answers' /></td>
 				<td>Issue date:</td>
 				<td><div id="entering" style="margin: 5px;"></div></td>
+				
+				<td>Answer date:</td>
+				<td><div id="answering" style="margin: 5px;"></div>
+				<div id='answering_none' style='display: none;'>None</div></td>
 			</tr>
 			<tr>
+				<td>Questions:</td>
+				<td><input type='text' name='questions' /></td>
+				
+				<td>Answers:</td>
+				<td><input type='text' name='answers' /></td>
+
+			</tr>
+			<tr>
+				<td>Questioner(s):</td>
+				<td><input type='text' name='questioners' /></td>
+				
 				<td>Answerer(s):</td>
 				<td><input type='text' name='answerers' /></td>
-				<td>Answer date:</td>
-				<td><div id="answering" style="margin: 5px;"></div></td>
+
 			</tr>
 			<tr>
+				<td>Questioners party:</td>
+				<td><input type='text' name='questioners_party' /></td>
+				
 				<td>Answerers ministry:</td>
 				<td><input type='text' name='answerers_ministry' /></td>
-				<td>Keywords:</td>
-				<td><input type='text' name='keywords' /></td>
 			</tr>
+			
 			<tr>
 				<td colspan="4">&nbsp;</td>
 			</tr>
@@ -152,6 +172,42 @@
 		
 		$('#simple_button').click(function() {
 			window.location.href = '/';
+		});
+		
+		$('input[name=answered]', '#searchform').change(function(){
+			if($(this).val() == 'n') {
+				$("#answering").dateRangeSlider("option", "enabled", false);
+				$("#answering").fadeOut(function(){
+					$("#answering_none").fadeIn();
+				});
+				$('#answering_max').val('');
+				$('#answering_min').val('');
+				
+				$('input[name=answers]', '#searchform').val('').attr('disabled', true);
+				$('input[name=answerers]', '#searchform').val('').attr('disabled', true);
+				$('input[name=answerers_ministry]', '#searchform').val('').attr('disabled', true);
+			} else {
+				$("#answering").dateRangeSlider("option", "enabled", true);
+				if($('#answering_max').val() == '' || $('#answering_min').val() == '') {
+					$("#answering_none").fadeOut(function(){
+						$("#answering").fadeIn();
+					});
+					
+					$('input[name=answers]', '#searchform').attr('disabled', false);
+					$('input[name=answerers]', '#searchform').attr('disabled', false);
+					$('input[name=answerers_ministry]', '#searchform').attr('disabled', false);
+					
+					var values = $("#answering").dateRangeSlider("values");
+					dmax = values.max;
+					dmin = values.min;
+					$('#answering_max').val(
+							dmax.getFullYear() + '-' + (dmax.getMonth() + 1)
+									+ '-' + dmax.getDate());
+					$('#answering_min').val(
+							dmin.getFullYear() + '-' + (dmin.getMonth() + 1)
+									+ '-' + dmin.getDate());
+				}
+			}
 		});
 		
 		function postdata() {
