@@ -66,6 +66,10 @@ public class SearchServlet extends HttpServlet {
 		if(req.getPathInfo() != null && req.getPathInfo().startsWith("/chart")) {
 			generateChart(req, resp);
 			return;
+		} else if(req.getPathInfo() != null
+				&& req.getPathInfo().startsWith("/wordcloud")) {
+			generateWordCloud(req, resp);
+			return;
 		} else if(req.getParameter("adv") == null
 				|| !req.getParameter("adv").equals("true")) {
 			// Invalid path, redirect to home
@@ -128,6 +132,36 @@ public class SearchServlet extends HttpServlet {
 		
 		RequestDispatcher view = req.getRequestDispatcher("/advanced.jsp");
 		view.forward(req, resp);
+	}
+	
+	/**
+	 * @param req
+	 * @param resp
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void generateWordCloud(HttpServletRequest req,
+			HttpServletResponse resp) throws IOException, ServletException {
+		Connection conn = null;
+		try {
+			conn = db.getConnection();
+		} catch(SQLException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			e.printStackTrace();
+			throw new ServletException(e);
+		}
+		
+		try {
+			new WordcloudGenerator(conn, req, resp);
+		} catch(Exception e1) {
+			throw new ServletException(e1);
+		} finally {
+			try {
+				conn.close();
+			} catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private boolean isSimple(Map<String, String[]> parameters) {
@@ -358,7 +392,7 @@ public class SearchServlet extends HttpServlet {
 			out.print("</table>");
 			
 			// Party Facet Table
-			if (facet_query != null && !isSimple(parameters)) {
+			if(facet_query != null && !isSimple(parameters)) {
 				stm_facet = conn.createStatement();
 				res_facet = stm_facet.executeQuery(facet_query);
 				Map<String, Integer> hashmap = new HashMap<String, Integer>();
@@ -436,7 +470,8 @@ public class SearchServlet extends HttpServlet {
 				
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<cite><font size='2'><font color='green'>Document: " + res.getString(2)
+				out.print("<cite><font size='2'><font color='green'>Document: "
+						+ res.getString(2)
 						+ "</font><br />By: " + res.getString(10) + " ("
 						+ res.getString(11) + ") on " + res.getString(13)
 						+ "</font></cite>");
@@ -447,7 +482,13 @@ public class SearchServlet extends HttpServlet {
 				out.print("<td>");
 				out.print("<p class='"
 						+ res.getString(2)
-						+ "' style='display: none;'>This is a paragraph.</p><button class='toggle "
+						+ "' style='display: none;'>Document<br /><div style='width: 500px;'>"
+						+ res.getInt(1)
+						+ "</div>Questions<br /><div style='width: 500px'>"
+						+ res.getInt(1)
+						+ "</div>Answers<br /><div style='width: 500px'>"
+						+ res.getInt(1)
+						+ "</div></p><button class='toggle "
 						+ res.getString(2) + "'>Wordclouds</button>");
 				out.print("</td>");
 				out.print("</tr>");
