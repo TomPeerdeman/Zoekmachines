@@ -1,6 +1,6 @@
 /**
  * File: WordcloudGenerator.java
- * Author: Tom Peerdeman
+ * 
  */
 package nl.uva.search;
 
@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 
 /**
+ * @author Ruben Janssen
  * @author Tom Peerdeman
  * 
  */
