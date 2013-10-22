@@ -417,7 +417,9 @@ public class SearchServlet extends HttpServlet {
 				
 				out.print("<tr>");
 				out.print("<td>");
-				out.print("<a href='#' class='wordcloud'><font size='2'>Word Cloud</font></a>");
+				out.print("<a href='http://tompeerdeman.co.vu:9090/search/wordcloud?t=DOC&d="
+						+ res.getInt(1) + "' target='_blank' class='wordcloud'>"
+						+ "<font size='2'>Word Cloud</font></a></a>");
 				out.print("</td>");
 				out.print("</tr>");
 				
