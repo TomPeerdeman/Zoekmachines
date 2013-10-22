@@ -44,7 +44,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 public class SearchServlet extends HttpServlet {
 	private static final long serialVersionUID = -3460489316807949031L;
 	
-	private final static int RESULTS_PER_PAGE = 30;
+	private final static int RESULTS_PER_PAGE = 10;
 	
 	private DataSource db;
 	
