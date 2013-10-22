@@ -32,11 +32,11 @@ body {
 	width: 500px;
 }
 
-a.wordcloud {
+a.hoverlink {
 	text-decoration: none;
 }
 
-a.wordcloud:hover {
+a.hoverlink:hover {
 	text-decoration: underline;
 }
 
