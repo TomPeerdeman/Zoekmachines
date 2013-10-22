@@ -472,7 +472,7 @@ public class SearchServlet extends HttpServlet {
 				out.print("<td>");
 				out.print("<a href='/search/wordcloud?&d="
 						+ res.getInt(1)
-						+ "' target='_blank' class='wordcloud'>"
+						+ "' target='_blank' class='hoverlink'>"
 						+ "<font size='2'>Word Cloud</font></a></a>");
 				out.print("</td>");
 				out.print("</tr>");
@@ -556,7 +556,7 @@ public class SearchServlet extends HttpServlet {
 				for(Map.Entry<String, Integer> entry : treeMap.entrySet()) {
 					out.print("<tr>");
 					out.print("<td>");
-					out.print("<a href='#' onclick='applyPartyFilter(\""
+					out.print("<a href='#' class='hoverlink' onclick='applyPartyFilter(\""
 							+ entry.getKey() + "\");'>" + entry.getKey()
 							+ "</a>");
 					out.print("</td>");
