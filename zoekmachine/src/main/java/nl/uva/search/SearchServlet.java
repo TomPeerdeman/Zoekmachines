@@ -44,6 +44,8 @@ import org.jfree.data.time.TimeSeriesCollection;
 public class SearchServlet extends HttpServlet {
 	private static final long serialVersionUID = -3460489316807949031L;
 	
+	private final static int RESULTS_PER_PAGE = 30;
+	
 	private DataSource db;
 	
 	@Override
@@ -358,7 +360,23 @@ public class SearchServlet extends HttpServlet {
 					"SELECT questioners_party, COUNT(*) FROM documents", null,
 					"GROUP BY questioners_party");
 		}
-		query += " LIMIT 10";
+		int page;
+		if(parameters.containsKey("page")) {
+			page = Integer.parseInt(req.getParameter("page"));
+		} else {
+			page = 1;
+		}
+		
+		if(page <= 0) {
+			page = 1;
+		}
+		
+		boolean showPrev = page > 1;
+		boolean showNext = true;
+		
+		query +=
+			" LIMIT " + ((page - 1) * RESULTS_PER_PAGE) + ", "
+					+ RESULTS_PER_PAGE;
 		
 		Statement stm = null;
 		ResultSet res = null;
@@ -375,14 +393,20 @@ public class SearchServlet extends HttpServlet {
 			res_count = stm_count.executeQuery(count_query);
 			res_count.next();
 			
-			if(res_count.getInt(1) == 0 && isSimple(parameters)) {
+			int nResults = res_count.getInt(1);
+			
+			if(nResults == 0 && isSimple(parameters)) {
 				out.print("<center>Your search did not match any documents. <br>Please check your spelling and note that at least 4 characters have to be used as input.</center");
 				return;
 			}
 			
-			if(res_count.getInt(1) == 0 && !isSimple(parameters)) {
+			if(nResults == 0 && !isSimple(parameters)) {
 				out.print("<center>Your search did not match any documents. <br>Please check your spelling and note that at least 4 characters are required for the questions and answers input.</center");
 				return;
+			}
+			
+			if(nResults <= page * RESULTS_PER_PAGE) {
+				showNext = false;
 			}
 			
 			out.print("<div id='results'>");
@@ -427,6 +451,23 @@ public class SearchServlet extends HttpServlet {
 				out.print("</tr>");
 			}
 			out.print("</table>");
+			out.print("<center>");
+			if(showPrev) {
+				out.print("<a href='#' class='paging' onclick='setpage("
+						+ (page - 1)
+						+ ")'>&lt;&lt;</a> ");
+			}
+			out.print("Page ");
+			out.print(page);
+			out.print(" of ");
+			out.print((int) Math.ceil((double) nResults
+					/ (double) RESULTS_PER_PAGE));
+			if(showNext) {
+				out.print(" <a href='#' class='paging' onclick='setpage("
+						+ (page + 1)
+						+ ")'>&gt;&gt;</a>");
+			}
+			out.print("</center>");
 			out.print("</div>");
 			
 			out.print("<div id='sidebar'>");

@@ -22,14 +22,23 @@ body {
 }
 
 #results {
-    float:left;
-    padding-left:300px;
+	float: left;
+	padding-left: 300px;
 }
 
 #sidebar {
-    float:right;
+	float: right;
 }
 
 .wordcloud {
-    text-decoration: none !important;
+	text-decoration: none !important;
+}
+
+a.paging {
+	text-decoration: none;
+	color: black;
+}
+
+a.paging:hover {
+	text-decoration: underline;
 }

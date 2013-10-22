@@ -16,6 +16,7 @@
 	<form method="POST" action="#" id="searchform">
 		<input type='hidden' name='simple_query' id="simple_query"
 			value="true" />
+		<input type="hidden" name="page" id="page" value="1" />
 
 		<table class="center" id="simpletable">
 			<tr>
@@ -53,6 +54,11 @@
 					});
 				}
 			});
+		}
+		
+		function setpage(page) {
+			$('#page').val(page);
+			postdata();
 		}
 	</script>
 </body>
