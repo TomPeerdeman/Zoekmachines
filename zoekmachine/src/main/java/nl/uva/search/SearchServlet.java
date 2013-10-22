@@ -409,8 +409,8 @@ public class SearchServlet extends HttpServlet {
 				showNext = false;
 			}
 			
-			out.print("<div id='results'>");
 			// Amount of Results
+			out.print("<div id='main'>");
 			out.print("<table width='450'>");
 			out.print("<tr>");
 			out.print("<td>");
@@ -450,8 +450,8 @@ public class SearchServlet extends HttpServlet {
 				out.print("</td>");
 				out.print("</tr>");
 			}
-			out.print("</table>");
-			out.print("<center>");
+			
+			out.print("<tr><td>");
 			if(showPrev) {
 				out.print("<a href='#' class='paging' onclick='setpage("
 						+ (page - 1)
@@ -467,7 +467,8 @@ public class SearchServlet extends HttpServlet {
 						+ (page + 1)
 						+ ")'>&gt;&gt;</a>");
 			}
-			out.print("</center>");
+			out.print("</td></tr>");
+			out.print("</table>");
 			out.print("</div>");
 			
 			out.print("<div id='sidebar'>");
