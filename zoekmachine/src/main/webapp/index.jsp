@@ -59,6 +59,7 @@
 		function setpage(page) {
 			$('#page').val(page);
 			postdata();
+			$('#page').val(1);
 		}
 	</script>
 </body>

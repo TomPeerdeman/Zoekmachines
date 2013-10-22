@@ -28,13 +28,12 @@
 	<img src="elgoog.jpg" id="logo" class="center">
 
 	<form method="POST" action="#" id="searchform" name="advsearchform">
-		<input type='hidden' name='simple_query' id="simple_query"
-			value="false" /> <input type="hidden" name="entering_max"
-			id="entering_max" value="<%=emax%>" /> <input type="hidden"
-			name="entering_min" id="entering_min" value="<%=emin%>" /> <input
-			type="hidden" name="answering_max" id="answering_max"
-			value="<%=amax%>" /> <input type="hidden" name="answering_min"
-			id="answering_min" value="<%=amin%>" />
+		<input type='hidden' name='simple_query' id="simple_query" value="false" />
+		<input type="hidden" name="entering_max" id="entering_max" value="<%=emax%>" />
+		<input type="hidden" name="entering_min" id="entering_min" value="<%=emin%>" /> 
+		<input type="hidden" name="answering_max" id="answering_max" value="<%=amax%>" /> 
+		<input type="hidden" name="answering_min" id="answering_min" value="<%=amin%>" />
+		<input type="hidden" name="page" id="page" value="1" />
 
 		<table class="center" id="advtable">
 			<tr>
@@ -174,6 +173,12 @@
 		function applyPartyFilter(party) {
 			document.advsearchform.questioners_party.value = party;
 			postdata();
+		}
+		
+		function setpage(page) {
+			$('#page').val(page);
+			postdata();
+			$('#page').val(1);
 		}
 	</script>
 	<%
