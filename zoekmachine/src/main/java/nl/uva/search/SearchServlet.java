@@ -351,8 +351,9 @@ public class SearchServlet extends HttpServlet {
 				return;
 			}
 			
-			out.print("<div id='results'>");
+
 			// Amount of Results
+			out.print("<div id='main'>");
 			out.print("<table width='450'>");
 			out.print("<tr>");
 			out.print("<td>");

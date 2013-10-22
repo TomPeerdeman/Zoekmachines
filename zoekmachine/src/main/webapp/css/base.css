@@ -9,6 +9,7 @@ body {
 
 #result {
 	text-align: left;
+    width:1000px;
 }
 
 #logo {
@@ -21,13 +22,14 @@ body {
 	border: solid 1 px black;
 }
 
-#results {
+#main {
     float:left;
-    padding-left:300px;
+    width:500px;
 }
 
 #sidebar {
     float:right;
+    width:500px;
 }
 
 .wordcloud {
