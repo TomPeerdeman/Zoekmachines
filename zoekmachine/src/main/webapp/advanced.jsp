@@ -22,7 +22,8 @@
 		String amin = (String) request.getAttribute("amin");
 
 		if (emax == null || emin == null || amax == null || amin == null) {
-			out.println("Date values not set!");
+			// Date bounds not set, redirect to set them
+			response.sendRedirect("/search?adv=true");
 		} else {
 	%>
 	<img src="elgoog.jpg" id="logo" class="center">
@@ -94,7 +95,7 @@
 			</tr>
 			
 			<tr>
-				<td colspan="4">&nbsp;</td>
+				<td colspan="5">&nbsp;</td>
 			</tr>
 			<tr>
 				<td>&nbsp;</td>
