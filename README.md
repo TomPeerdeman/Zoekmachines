@@ -9,6 +9,7 @@ Tom Peerdeman
 Installation
 =====
 Have installed:<br />
+Maven<br />
 MySQL<br />
 tomcat<br />
 
