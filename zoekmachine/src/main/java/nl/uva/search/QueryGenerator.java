@@ -27,14 +27,17 @@ public class QueryGenerator {
 		addWhereLike("doc_id", "doc_id");
 		addWhereLike("title", "title");
 		addWhereLike("category", "category");
-		addWhereLike("answerers", "answerers");
-		addWhereLike("keywords", "keywords");
-		addWhereLike("questioners", "questioners");
+		// addWhereLike("answerers", "answerers");
+		// addWhereLike("keywords", "keywords");
+		// addWhereLike("questioners", "questioners");
 		addWhereRLike("questioners_party", "questioners_party",
 				"^(.+, )?%VAL%(, .+)?$");
 		addWhereLike("answerers_ministry", "answerers_ministry");
 		addWhereMatch(new String[] {"questions"}, "questions");
 		addWhereMatch(new String[] {"answers"}, "answers");
+		addWhereMatch(new String[] {"keywords"}, "keywords");
+		addWhereMatch(new String[] {"questioners"}, "questioners");
+		addWhereMatch(new String[] {"answerers"}, "answerers");
 		addWhereBetween("entering_date", new String[] {"entering_min",
 														"entering_max"}, false);
 		String answered = getParameter("answered");
@@ -61,7 +64,11 @@ public class QueryGenerator {
 	private void addWhereRLike(String db, String param, String regex) {
 		String v = getParameter(param);
 		if(v != null && v.length() > 0) {
-			where.add(db + " RLIKE '" + regex.replaceAll("%VAL%", v) + "'");
+			String[] split = v.split(",");
+			for(String s : split) {
+				where.add(db + " RLIKE '" + regex.replaceAll("%VAL%", s.trim())
+						+ "'");
+			}
 		}
 	}
 	

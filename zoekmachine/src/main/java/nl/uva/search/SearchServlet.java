@@ -10,7 +10,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -355,23 +357,67 @@ public class SearchServlet extends HttpServlet {
 				"SELECT questioners_party, COUNT(*) FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 						+ input + "') GROUP BY questioners_party";
 		} else {
-			String match_against = null;
+			List<String> match = new ArrayList<String>(5);
+			
 			if(req.getParameter("questions") != null
-					&& req.getParameter("answers") != null
-					&& req.getParameter("questions").length() != 0
-					&& req.getParameter("answers").length() != 0) {
-				match_against = ",(MATCH questions AGAINST ('%"
-						+ req.getParameter("questions")
-						+ "%') + MATCH answers AGAINST ('%"
-						+ req.getParameter("answers") + "%')) AS score ";
-			} else if(req.getParameter("questions") != null
 					&& req.getParameter("questions").length() != 0) {
-				match_against = ",(MATCH questions AGAINST ('%"
-						+ req.getParameter("questions") + "%')) AS score ";
-			} else if(req.getParameter("answers") != null
+				match.add("MATCH (questions) AGAINST ('%"
+						+ req.getParameter("questions") + "%')");
+			}
+			
+			if(req.getParameter("answers") != null
 					&& req.getParameter("answers").length() != 0) {
-				match_against = ",(MATCH answers AGAINST ('%"
-						+ req.getParameter("answers") + "%')) AS score ";
+				match.add("MATCH (answers) AGAINST ('%"
+						+ req.getParameter("answers") + "%')");
+			}
+			
+			if(req.getParameter("keywords") != null
+					&& req.getParameter("keywords").length() != 0) {
+				match.add("MATCH (keywords) AGAINST ('%"
+						+ req.getParameter("keywords") + "%')");
+			}
+			
+			if(req.getParameter("questioners") != null
+					&& req.getParameter("questioners").length() != 0) {
+				match.add("MATCH (questioners) AGAINST ('%"
+						+ req.getParameter("questioners") + "%')");
+			}
+			
+			if(req.getParameter("answerers") != null
+					&& req.getParameter("answerers").length() != 0) {
+				match.add("MATCH (answerers) AGAINST ('%"
+						+ req.getParameter("answerers") + "%')");
+			}
+			
+			String match_against = null;
+			
+			// if(req.getParameter("questions") != null
+			// && req.getParameter("answers") != null
+			// && req.getParameter("questions").length() != 0
+			// && req.getParameter("answers").length() != 0) {
+			// match_against = ",(MATCH questions AGAINST ('%"
+			// + req.getParameter("questions")
+			// + "%') + MATCH answers AGAINST ('%"
+			// + req.getParameter("answers") + "%')) AS score ";
+			// } else if(req.getParameter("questions") != null
+			// && req.getParameter("questions").length() != 0) {
+			// match_against = ",(MATCH questions AGAINST ('%"
+			// + req.getParameter("questions") + "%')) AS score ";
+			// } else if(req.getParameter("answers") != null
+			// && req.getParameter("answers").length() != 0) {
+			// match_against = ",(MATCH answers AGAINST ('%"
+			// + req.getParameter("answers") + "%')) AS score ";
+			// }
+			
+			if(match.size() > 0) {
+				match_against = ", (";
+				for(int i = 0; i < match.size(); i++) {
+					match_against += "(" + match.get(i) + ")";
+					if(i + 1 < match.size()) {
+						match_against += " + ";
+					}
+				}
+				match_against += ") AS Score ";
 			}
 			
 			QueryGenerator gen = new QueryGenerator(parameters);
@@ -390,6 +436,10 @@ public class SearchServlet extends HttpServlet {
 					"SELECT questioners_party, COUNT(*) FROM documents", null,
 					"GROUP BY questioners_party");
 		}
+		
+		System.out.println(query);
+		System.out.println();
+		
 		int page;
 		if(parameters.containsKey("page")) {
 			page = Integer.parseInt(req.getParameter("page"));

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Machine: localhost
--- Genereertijd: 21 okt 2013 om 23:17
+-- Genereertijd: 23 okt 2013 om 13:39
 -- Serverversie: 5.5.32-0ubuntu0.13.04.1
 -- PHP-versie: 5.4.9-4ubuntu2.3
 
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Databank: `zoek_db2`
+-- Databank: `zoek_db`
 --
 
 -- --------------------------------------------------------
@@ -45,8 +45,11 @@ CREATE TABLE IF NOT EXISTS `documents` (
   PRIMARY KEY (`id`),
   FULLTEXT KEY `title` (`title`,`contents`,`category`,`questions`,`answers`,`answerers`,`answerers_ministry`,`keywords`,`questioners`,`questioners_party`,`doc_id`),
   FULLTEXT KEY `questions` (`questions`),
-  FULLTEXT KEY `answers` (`answers`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+  FULLTEXT KEY `answers` (`answers`),
+  FULLTEXT KEY `keywords` (`keywords`),
+  FULLTEXT KEY `questioners` (`questioners`),
+  FULLTEXT KEY `answerers` (`answerers`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=40667 ;
 
 -- --------------------------------------------------------
 
