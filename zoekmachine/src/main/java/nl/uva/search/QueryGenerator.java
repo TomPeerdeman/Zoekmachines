@@ -27,9 +27,6 @@ public class QueryGenerator {
 		addWhereLike("doc_id", "doc_id");
 		addWhereLike("title", "title");
 		addWhereLike("category", "category");
-		// addWhereLike("answerers", "answerers");
-		// addWhereLike("keywords", "keywords");
-		// addWhereLike("questioners", "questioners");
 		addWhereRLike("questioners_party", "questioners_party",
 				"^(.+, )?%VAL%(, .+)?$");
 		addWhereLike("answerers_ministry", "answerers_ministry");

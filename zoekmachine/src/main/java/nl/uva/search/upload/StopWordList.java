@@ -1,6 +1,6 @@
 /**
  * File: StopWordList.java
- * Author: Tom Peerdeman
+ * 
  */
 package nl.uva.search.upload;
 
@@ -12,6 +12,7 @@ import java.util.HashSet;
 import javax.servlet.ServletContext;
 
 /**
+ * @author Ruben Janssen
  * @author Tom Peerdeman
  * 
  */
@@ -38,6 +39,10 @@ public class StopWordList {
 		in.close();
 	}
 	
+	/**
+	 * @param word
+	 * @return True if the word is in the stop word list, otherwise false
+	 */
 	public boolean inList(String word) {
 		return wordList.contains(word);
 	}

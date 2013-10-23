@@ -390,25 +390,6 @@ public class SearchServlet extends HttpServlet {
 			}
 			
 			String match_against = null;
-			
-			// if(req.getParameter("questions") != null
-			// && req.getParameter("answers") != null
-			// && req.getParameter("questions").length() != 0
-			// && req.getParameter("answers").length() != 0) {
-			// match_against = ",(MATCH questions AGAINST ('%"
-			// + req.getParameter("questions")
-			// + "%') + MATCH answers AGAINST ('%"
-			// + req.getParameter("answers") + "%')) AS score ";
-			// } else if(req.getParameter("questions") != null
-			// && req.getParameter("questions").length() != 0) {
-			// match_against = ",(MATCH questions AGAINST ('%"
-			// + req.getParameter("questions") + "%')) AS score ";
-			// } else if(req.getParameter("answers") != null
-			// && req.getParameter("answers").length() != 0) {
-			// match_against = ",(MATCH answers AGAINST ('%"
-			// + req.getParameter("answers") + "%')) AS score ";
-			// }
-			
 			if(match.size() > 0) {
 				match_against = ", (";
 				for(int i = 0; i < match.size(); i++) {
