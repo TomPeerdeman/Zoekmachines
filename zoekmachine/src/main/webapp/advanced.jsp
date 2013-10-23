@@ -228,7 +228,14 @@
 		}
 		
 		function applyPartyFilter(party) {
-			document.advsearchform.questioners_party.value = party;
+			var val = document.advsearchform.questioners_party.value;
+			if(val.length == 0) {
+				document.advsearchform.questioners_party.value = party;
+			} else if(val.indexOf(party) < 0) {
+				document.advsearchform.questioners_party.value = val + ', ' + party;
+			} else {
+				return;
+			}
 			postdata();
 		}
 		
