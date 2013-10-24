@@ -11,7 +11,7 @@ hypotheekrenteaftrek
 massamoord srebrenica
 1, 1, 0, 0, 1, 1, 1, 0, 0, 0          7     5       5
 referendum europese grondwet
-1, 1, 1, 1, 1, 1, 1, 0, 1, 0          8     7       3
+1, 1, 1, 1, 1, 1, 1, 0, 1, 0          8     8       2
 legkippen beleid
 1, 1, 1, 1, 1, 0, 1, 0, 0, 0          9     6       4
 pim fortuyn
