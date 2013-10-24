@@ -1,0 +1,21 @@
+kernwapen beleid iran
+1, 1, 1, 1, 0, 1, 1, 0, 0, 1
+de film beyond fitna
+1, 1, 0, 0, 0, 0, 0, 0, 0, 0
+terroristische dreiging nederland
+1, 1, 0, 0, 0, 0, 0, 1, 1, 1
+aardgas in de waddenzee
+1, 1, 1, 1, 1, 1, 1, 0, 1, 0
+hypotheekrenteaftrek
+1, 0, 0, 1, 0, 0, 0, 1, 0, 1
+massamoord srebrenica
+1, 0, 1, 0, 0, 1, 1, 0, 0, 1
+referendum europese grondwet
+1, 0, 1, 1, 0, 1, 1, 1, 0, 0
+legkippen beleid
+1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+pim fortuyn
+1, 1, 0, 1, 0, 1, 1, 1, 1, 0
+huurverhoging
+1, 1, 1, 0, 0, 1, 0, 1, 0, 1
+

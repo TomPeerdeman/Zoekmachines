@@ -1,0 +1,21 @@
+kernwapen beleid iran              agreed:  rel:  non rel:  Average P (doc is relevant als beiden het relvant vinden):      P@10:
+1, 0, 0, 1, 0, 1, 1, 0, 0, 0          9     4       6       (1/4 + 2/6 + 3/7) / 3 = 0.34                                    0.3
+de film beyond fitna            
+1, 1, 0, 0, 0, 0, 1, 0, 0, 0          10    3       7       (1/1 + 2/2 + 3/7) / 3 = 0.81                                    0.3
+terroristische dreiging nederland
+0, 1, 1, 0, 0, 1, 1, 1, 1, 0          9     6       4       (1/2 + 2/3 + 3/6 + 4/7 + 5/8 + 6/9) / 6 = 0.59                  0.6
+aardgas in de waddenzee
+1, 1, 1, 1, 1, 1, 1, 0, 0, 0          8     7       3       (1/1 + 2/2 + 3/3 + 4/4 + 5/5) / 5 = 1                           0.5
+hypotheekrenteaftrek
+1, 1, 1, 1, 1, 1, 1, 0, 0, 0          8     7       3       (1/1 + 2/2 + 3/3 + 4/4 + 5/7) / 5 = 0.94                        0.5
+massamoord srebrenica
+1, 1, 0, 0, 1, 1, 1, 0, 0, 0          7     5       5       (1/1 + 2/2 + 3/7) / 3 = 0.81                                    0.3
+referendum europese grondwet
+1, 1, 1, 1, 1, 1, 1, 0, 1, 0          8     7       3       (1/1 + 2/2 + 3/3 + 4/4 + 5/5 + 6/6) / 6 = 1                     0.6
+legkippen beleid
+1, 1, 1, 1, 1, 0, 1, 0, 0, 0          9     6       4       (1/1 + 2/2 + 3/3 + 4/4 + 5/5) / 5 = 1                           0.5
+pim fortuyn
+1, 1, 1, 1, 0, 0, 1, 0, 1, 0          9     6       4       (1/1 + 2/2 + 3/3 + 4/7 + 5/9) / 5 = 0.83                        0.5
+huurverhoging
+1, 1, 1, 1, 1, 1, 1, 0, 0, 0          7     7       3       (1/1 + 2/2 + 3/3 + 4/4 + 5/7) / 5 = 0.94                        0.5
+                                     84     58      42      MAP: 0.826
