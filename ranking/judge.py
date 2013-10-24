@@ -59,7 +59,12 @@ for line in f2:
 
 f1.close()
 f2.close()
-			
+
+nrel1 = 0.0
+nrel2 = 0.0
+nagree = 0.0
+n = 0.0
+
 ap_sum = 0.0 
 for query in j1:
 	space_safe = query.replace(' ', '_')
@@ -69,10 +74,21 @@ for query in j1:
 	rel = 0.0
 	summ = 0.0
 	for i in range(0, len(atp1)):
+		n += 1.0
 		f.write("%d\t%f\t%f\n" % (i, atp1[i], atp2[i]))
 		if rel1[i] == 1 and rel2[i] == 1:
+			nagree += 1.0
 			rel += 1.0
 			summ += rel / (i + 1)
+
+		if rel1[i] == 0 and rel2[i] == 0:
+			nagree += 1.0
+
+		if rel1[i] == 1:
+			nrel1 += 1.0
+
+		if rel2[i] == 1:
+			nrel2 += 1.0
 
 	print "AP(" + query + ")"
 	print summ / rel
@@ -90,6 +106,18 @@ for query in j1:
 
 print "\nMAP"
 print ap_sum / len(j1)
+
+pa = nagree / n
+print "\nPA"
+print pa
+prel = (nrel1 + nrel2) / (2 * n)
+print "PREL"
+print prel
+
+pe = prel**2 + (1 - prel)**2
+
+print "\nKAPPA"
+print (pa - pe) / (1 - pe)
 
 os.chdir("plot")
 os.system("gnuplot *.gnuplot")
