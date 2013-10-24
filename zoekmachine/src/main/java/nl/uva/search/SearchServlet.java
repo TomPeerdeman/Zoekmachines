@@ -235,15 +235,17 @@ public class SearchServlet extends HttpServlet {
 		if(isSimple(parameters)) {
 			String input = req.getParameter("query");
 			
-			// Add *'s around the words for better boolean search
-			String[] splits = input.split(" ");
-			input = "";
-			for(String split : splits) {
-				if(split.length() > 3) {
-					input += " *" + split + "*";
-				}
-			}
-			input = input.trim();
+			/*
+			 * // Add *'s around the words for better boolean search
+			 * String[] splits = input.split(" ");
+			 * input = "";
+			 * for(String split : splits) {
+			 * if(split.length() > 3) {
+			 * input += " *" + split + "*";
+			 * }
+			 * }
+			 * input = input.trim();
+			 */
 			
 			query =
 				"SELECT COUNT(*), YEAR(entering_date) AS year, MONTH(entering_date) AS month "
@@ -356,22 +358,24 @@ public class SearchServlet extends HttpServlet {
 		if(isSimple(parameters)) {
 			String input = req.getParameter("query");
 			
-			// Add *'s around the words for better boolean search
-			String[] splits = input.split(" ");
-			input = "";
-			for(String split : splits) {
-				if(split.length() > 3) {
-					input += " *" + split + "*";
-				}
-			}
-			input = input.trim();
+			/*
+			 * // Add *'s around the words for better boolean search
+			 * String[] splits = input.split(" ");
+			 * input = "";
+			 * for(String split : splits) {
+			 * if(split.length() > 3) {
+			 * input += " *" + split + "*";
+			 * }
+			 * }
+			 * input = input.trim();
+			 */
 			
 			query =
 				"SELECT *, MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 						+ input
-						+ "' IN BOOLEAN MODE) as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
+						+ "') as Score FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 						+ input
-						+ "' IN BOOLEAN MODE) ORDER BY Score DESC";
+						+ "') ORDER BY Score DESC";
 			count_query =
 				"SELECT COUNT(*) as results FROM documents WHERE MATCH (title, contents, category, questions, answers, answerers, answerers_ministry, keywords, questioners, questioners_party, doc_id) AGAINST ('"
 						+ input + "')";
